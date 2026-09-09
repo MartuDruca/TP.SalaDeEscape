@@ -4,10 +4,11 @@ public class Jugador
     public string Nombre { get; set; }
     public int SalaActual { get; set; }
 
-    Jugador(string nombre)
+    public Jugador(string nombre)
     {   
         Nombre = nombre;
         SalaActual = 1;
     }
-    Jugador(){}
+
+    public Jugador() { }
 }

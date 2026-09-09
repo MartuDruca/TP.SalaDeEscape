@@ -1,0 +1,265 @@
+@{
+    ViewData["Title"] = "Puzzle Game";
+}
+
+<div class="puzzle-container">
+    <div class="puzzle-header">
+        <h1 class="puzzle-title">Arma el Puzzle</h1>
+        <p class="puzzle-subtitle">Arrastra las piezas al tablero para completar la imagen</p>
+    </div>
+
+    <div class="puzzle-wrapper">
+        
+        <div class="puzzle-section">
+            <div class="board-header">
+                <h3>Tablero</h3>
+                <span class="completion-counter">
+                    <span id="placedCount">0</span> / <span id="totalCount">9</span>
+                </span>
+            </div>
+            <div class="puzzle-board" id="puzzleBoard">
+                
+            </div>
+        </div>
+
+       
+        <div class="puzzle-pieces-section">
+            <div class="pieces-header">
+                <h3>Piezas Disponibles</h3>
+            </div>
+            <div class="pieces-area" id="piecesArea">
+               
+            </div>
+        </div>
+    </div>
+
+    <div class="controls">
+        <button class="btn-reset" id="resetBtn">
+            <span>🔄</span> Reiniciar
+        </button>
+        <div id="completionMessage" class="completion-message d-none">
+            <div class="celebration">
+                <h2>¡Puzzle Completado!</h2>
+                <form action="@Url.Action("Sala1part2", "Home")" method="get">
+                <button class = "btn-next">
+                    <span>-></span> Siguiente Puzzle
+                </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+class PuzzleGame {
+    constructor() {
+        this.gridSize = 3; 
+        this.imageUrl = '/receta.png'; 
+        this.boardElement = document.getElementById('puzzleBoard');
+        this.piecesAreaElement = document.getElementById('piecesArea');
+        this.resetBtn = document.getElementById('resetBtn');
+        this.completionMessage = document.getElementById('completionMessage');
+        this.placedCountElement = document.getElementById('placedCount');
+        this.totalCountElement = document.getElementById('totalCount');
+        
+        this.boardWidth = 350;
+        this.boardHeight = 350;
+        this.pieceSize = this.boardWidth / this.gridSize;
+        this.pieces = [];
+        this.draggedPiece = null;
+        this.dragElement = null;
+        this.offsetX = 0;
+        this.offsetY = 0;
+        this.snapDistance = 35;
+        
+        this.totalCountElement.textContent = this.gridSize * this.gridSize;
+        this.resetBtn.addEventListener('click', () => this.reset());
+        this.init();
+    }
+    
+    init() {
+        this.generatePuzzlePieces();
+    }
+    
+    generatePuzzlePieces() {
+        const canvas = document.createElement('canvas');
+        canvas.width = this.boardWidth;
+        canvas.height = this.boardHeight;
+        const ctx = canvas.getContext('2d');
+        
+        const img = new Image();
+        img.crossOrigin = "anonymous";
+        img.onload = () => {
+            ctx.drawImage(img, 0, 0, this.boardWidth, this.boardHeight);
+            
+            this.pieces = [];
+            
+            
+            for (let row = 0; row < this.gridSize; row++) {
+                for (let col = 0; col < this.gridSize; col++) {
+                    const pieceCanvas = document.createElement('canvas');
+                    pieceCanvas.width = this.pieceSize;
+                    pieceCanvas.height = this.pieceSize;
+                    const pieceCtx = pieceCanvas.getContext('2d');
+                    
+                    pieceCtx.drawImage(
+                        canvas,
+                        col * this.pieceSize, row * this.pieceSize,
+                        this.pieceSize, this.pieceSize,
+                        0, 0,
+                        this.pieceSize, this.pieceSize
+                    );
+                    
+                    const piece = {
+                        id: row * this.gridSize + col,
+                        row: row,
+                        col: col,
+                        image: pieceCanvas.toDataURL(),
+                        placed: false,
+                        correctX: col * this.pieceSize,
+                        correctY: row * this.pieceSize
+                    };
+                    
+                    this.pieces.push(piece);
+                }
+            }
+            
+            this.shufflePieces();
+            this.render();
+        };
+        img.src = this.imageUrl;
+    }
+    
+    shufflePieces() {
+        
+        this.pieces.forEach(piece => {
+            piece.placed = false;
+        });
+        
+       
+        for (let i = this.pieces.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [this.pieces[i], this.pieces[j]] = [this.pieces[j], this.pieces[i]];
+        }
+    }
+    
+    render() {
+        
+        this.piecesAreaElement.innerHTML = '';
+        this.boardElement.innerHTML = '';
+        
+        this.pieces.forEach((piece) => {
+            const pieceEl = document.createElement('div');
+            pieceEl.className = 'puzzle-piece';
+            pieceEl.style.width = this.pieceSize + 'px';
+            pieceEl.style.height = this.pieceSize + 'px';
+            pieceEl.style.backgroundImage = `url(${piece.image})`;
+            pieceEl.style.backgroundSize = 'cover';
+            
+            if (piece.placed) {
+              
+                pieceEl.classList.add('placed');
+                pieceEl.style.position = 'absolute';
+                pieceEl.style.left = piece.correctX + 'px';
+                pieceEl.style.top = piece.correctY + 'px';
+                this.boardElement.appendChild(pieceEl);
+            } else {
+              
+                pieceEl.style.position = 'relative';
+                this.piecesAreaElement.appendChild(pieceEl);
+            }
+            
+            pieceEl.addEventListener('mousedown', (e) => this.startDrag(e, piece, pieceEl));
+            piece.element = pieceEl;
+        });
+        
+        this.updateCounter();
+    }
+    
+    updateCounter() {
+        const placed = this.pieces.filter(p => p.placed).length;
+        this.placedCountElement.textContent = placed;
+    }
+    
+    startDrag(e, piece, element) {
+        if (piece.placed) return;
+        
+        e.preventDefault();
+        e.stopPropagation();
+        
+        
+        const dragClone = element.cloneNode(true);
+        dragClone.style.position = 'fixed';
+        dragClone.style.pointerEvents = 'none';
+        dragClone.style.opacity = '0.8';
+        dragClone.style.zIndex = '2000';
+        dragClone.style.border = '3px dashed #ff0000';
+        document.body.appendChild(dragClone);
+        
+       
+        element.style.opacity = '0.3';
+        
+        const rect = element.getBoundingClientRect();
+        const offsetX = e.clientX - rect.left;
+        const offsetY = e.clientY - rect.top;
+        
+        const onMouseMove = (moveEvent) => {
+            dragClone.style.left = (moveEvent.clientX - offsetX) + 'px';
+            dragClone.style.top = (moveEvent.clientY - offsetY) + 'px';
+        };
+        
+        const onMouseUp = (upEvent) => {
+            document.removeEventListener('mousemove', onMouseMove);
+            document.removeEventListener('mouseup', onMouseUp);
+            
+            const boardRect = this.boardElement.getBoundingClientRect();
+            const cloneRect = dragClone.getBoundingClientRect();
+            
+           
+            const relX = cloneRect.left - boardRect.left;
+            const relY = cloneRect.top - boardRect.top;
+           
+            const isInsideBoard = relX >= 0 && relX <= this.boardWidth && 
+                                  relY >= 0 && relY <= this.boardHeight;
+            
+            if (isInsideBoard) {
+                const distX = Math.abs(relX - piece.correctX);
+                const distY = Math.abs(relY - piece.correctY);
+                
+                if (distX < this.snapDistance && distY < this.snapDistance) {
+                    piece.placed = true;
+                }
+            }
+         
+            dragClone.remove();
+            element.style.opacity = '1';
+            
+            this.render();
+            this.checkCompletion();
+        };
+        
+        document.addEventListener('mousemove', onMouseMove);
+        document.addEventListener('mouseup', onMouseUp);
+    }
+    
+    checkCompletion() {
+        const allPlaced = this.pieces.every(p => p.placed);
+        if (allPlaced) {
+            this.completionMessage.classList.remove('d-none');
+            setTimeout(() => {
+                this.completionMessage.classList.add('d-none');
+            }, 4000);
+        }
+    }
+    
+    reset() {
+        this.shufflePieces();
+        this.render();
+        this.completionMessage.classList.add('d-none');
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    new PuzzleGame();
+});
+</script>

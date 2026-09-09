@@ -1,0 +1,32 @@
+<div class="salas-page">
+    <div class="salas-header">
+        <p class="salas-kicker">Mapa de la cocina</p>
+        <h1 class="salas-title">Elige tu sala</h1>
+    </div>
+
+    <div class="salas-grid">
+        <a class="salas-card salas-card--active" href="@Url.Action("Introduccion", "Home")">
+            <span class="salas-number">Sala 1</span>
+            <span class="salas-name">La cocina vacía</span>
+            <span class="salas-status">Entrar</span>
+        </a>
+
+        <a class="salas-card salas-card--active" href="@Url.Action("Sala2", "Home")">
+            <span class="salas-number">Sala 2</span>
+            <span class="salas-name">El despensa oculta</span>
+            <span class="salas-status">Entrar</span>
+        </a>
+
+        <a class="salas-card salas-card--active" href="@Url.Action("Sala3", "Home")">
+            <span class="salas-number">Sala 3</span>
+            <span class="salas-name">La nevera misteriosa</span>
+            <span class="salas-status">Entrar</span>
+        </a>
+
+        <div class="salas-card salas-card--locked" aria-disabled="true">
+            <span class="salas-number">Sala 4</span>
+            <span class="salas-name">La salida final</span>
+            <span class="salas-status">Bloqueada</span>
+        </div>
+    </div>
+</div>

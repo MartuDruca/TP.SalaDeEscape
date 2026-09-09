@@ -1,6 +1,10 @@
-﻿<h1>Bienvenido a la sala de escape </h1>
+﻿<div class="index-page">
+    <div class="index-card">
+        <h1 class="index-title">Bienvenido a la sala de escape</h1>
 
-<form action="@Url.Action("Inicio", "Home")" method="post">
-    <input type="text" id="nombreJugador" name="nombre" required />
-    <button type="submit">Iniciar juego</button>
-</form>
+        <form class="index-form" action="@Url.Action("Registro", "Home")" method="post">
+            <input class="index-input" type="text" id="nombreJugador" name="nombre" placeholder="Ingresá tu nombre" required />
+            <button class="index-button" type="submit">Iniciar juego</button>
+        </form>
+    </div>
+</div>

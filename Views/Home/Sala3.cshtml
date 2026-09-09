@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Seis Letras</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
+
+</head>
+<body>
+<div class="app">
+  <header>
+    <div class="eyebrow">Sala 3 · La cocina vacía</div>
+    <h1>Seis<span>Letras</span></h1>
+    <div class="sub">Adiviná la palabra en 6 intentos</div>
+  </header>
+
+  <div class="hint"><b>Modo difícil activado:</b> las letras verdes y amarillas que ya descubriste hay que reutilizarlas en los siguientes intentos.</div>
+
+  <div class="board" id="board"></div>
+  <div class="msg" id="msg"></div>
+  <button class="reset" id="resetBtn">Jugar de nuevo</button>
+
+  <div class="keyboard" id="keyboard">
+    <div class="krow">
+      <button class="key" data-key="q">q</button>
+      <button class="key" data-key="w">w</button>
+      <button class="key" data-key="e">e</button>
+      <button class="key" data-key="r">r</button>
+      <button class="key" data-key="t">t</button>
+      <button class="key" data-key="y">y</button>
+      <button class="key" data-key="u">u</button>
+      <button class="key" data-key="i">i</button>
+      <button class="key" data-key="o">o</button>
+      <button class="key" data-key="p">p</button>
+    </div>
+    <div class="krow">
+      <button class="key" data-key="a">a</button>
+      <button class="key" data-key="s">s</button>
+      <button class="key" data-key="d">d</button>
+      <button class="key" data-key="f">f</button>
+      <button class="key" data-key="g">g</button>
+      <button class="key" data-key="h">h</button>
+      <button class="key" data-key="j">j</button>
+      <button class="key" data-key="k">k</button>
+      <button class="key" data-key="l">l</button>
+      <button class="key" data-key="ñ">ñ</button>
+    </div>
+    <div class="krow">
+      <button class="key wide" data-key="enter">enter</button>
+      <button class="key" data-key="z">z</button>
+      <button class="key" data-key="x">x</button>
+      <button class="key" data-key="c">c</button>
+      <button class="key" data-key="v">v</button>
+      <button class="key" data-key="b">b</button>
+      <button class="key" data-key="n">n</button>
+      <button class="key" data-key="m">m</button>
+      <button class="key wide" data-key="back">⌫</button>
+    </div>
+  </div>
+</div>
+
+<style>
+    .sala3-layout {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 32px 16px;
+        background: linear-gradient(135deg, #0f172a 0%, #111827 100%);
+        color: #e5e7eb;
+        font-family: 'Poppins', sans-serif;
+    }
+
+    .sala3-card {
+        width: min(100%, 820px);
+        background: rgba(15, 23, 42, 0.92);
+        border: 1px solid rgba(148, 163, 184, 0.25);
+        border-radius: 24px;
+        padding: 28px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+        text-align: center;
+    }
+
+    .sala3-kicker {
+        margin: 0 0 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        color: #fbbf24;
+        font-size: 0.72rem;
+        font-weight: 700;
+    }
+
+    .sala3-card h1 {
+        margin: 0 0 12px;
+        font-size: clamp(2rem, 4vw, 3rem);
+        color: #f8fafc;
+    }
+
+    .sala3-instruction {
+        margin: 0 auto 24px;
+        max-width: 620px;
+        color: #cbd5e1;
+        font-size: 1.05rem;
+        line-height: 1.6;
+    }
+
+    .image-puzzle {
+        position: relative;
+        width: min(100%, 700px);
+        margin: 0 auto;
+        border-radius: 18px;
+        overflow: hidden;
+        border: 2px solid rgba(148, 163, 184, 0.3);
+        box-shadow: 0 18px 42px rgba(15, 23, 42, 0.5);
+        cursor: pointer;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .image-puzzle:hover,
+    .image-puzzle:focus-visible {
+        transform: translateY(-2px);
+        box-shadow: 0 22px 48px rgba(15, 23, 42, 0.6);
+        outline: none;
+    }
+
+    .image-puzzle img {
+        display: block;
+        width: 100%;
+        height: auto;
+    }
+
+    .grid-overlay {
+        position: absolute;
+        inset: 0;
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        grid-template-rows: repeat(5, 1fr);
+        pointer-events: none;
+    }
+
+    .grid-overlay::before {
+        content: "";
+        grid-column: 2;
+        grid-row: 4;
+        border: 3px solid #facc15;
+        border-radius: 12px;
+        margin: 6px;
+        background: rgba(250, 204, 21, 0.12);
+        box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.25);
+    }
+
+    .message {
+        min-height: 28px;
+        margin: 20px 0 18px;
+        color: #fbbf24;
+        font-weight: 600;
+        font-size: 1rem;
+    }
+
+    .message.success {
+        color: #6ee7b7;
+    }
+
+    .next-button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 12px 22px;
+        border-radius: 999px;
+        background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+        color: #111827;
+        font-weight: 700;
+        text-decoration: none;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        box-shadow: 0 10px 24px rgba(245, 158, 11, 0.45);
+    }
+
+    .next-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 14px 28px rgba(245, 158, 11, 0.55);
+    }
+
+    .hidden {
+        display: none;
+    }
+</style>
+
+<script>
+    (function () {
+        const puzzle = document.getElementById("imagePuzzle");
+        const message = document.getElementById("message");
+        const nextButton = document.getElementById("nextButton");
+
+        const cols = 3;
+        const rows = 5;
+        const targetCol = 1;
+        const targetRow = 3;
+
+        function getCellFromClick(event) {
+            const rect = puzzle.getBoundingClientRect();
+            const x = event.clientX - rect.left;
+            const y = event.clientY - rect.top;
+
+            const cellWidth = rect.width / cols;
+            const cellHeight = rect.height / rows;
+
+            const col = Math.min(cols - 1, Math.max(0, Math.floor(x / cellWidth)));
+            const row = Math.min(rows - 1, Math.max(0, Math.floor(y / cellHeight)));
+
+            return { col, row };
+        }
+
+        puzzle.addEventListener("click", function (event) {
+            const cell = getCellFromClick(event);
+
+            if (cell.col === targetCol && cell.row === targetRow) {
+                message.textContent = "¡Correcto! La pista ha sido desbloqueada.";
+                message.classList.add("success");
+                nextButton.classList.remove("hidden");
+                puzzle.setAttribute("aria-label", "La pista ha sido encontrada");
+                return;
+            }
+
+            message.textContent = "No es ahí. La pista está en la columna del medio y la anteúltima fila.";
+            message.classList.remove("success");
+            nextButton.classList.add("hidden");
+        });
+
+        puzzle.addEventListener("keydown", function (event) {
+            if (event.key === "Enter" || event.key === " ") {
+                event.preventDefault();
+                puzzle.click();
+            }
+        });
+    })();
+</script>
+<script>
+(function(){
+  var secret = "AZUCAR";
+  var WORD_LEN = secret.length;
+  var MAX_ROWS = 6;
+  var currentRow = 0;
+  var currentGuess = "";
+  var finished = false;
+  var guesses = [];
+  var results = []; 
+  var hardMode = true; 
+
+  var boardEl = document.getElementById("board");
+  var msgEl = document.getElementById("msg");
+  var resetBtn = document.getElementById("resetBtn");
+  var keyStates = {};
+
+  function buildBoard(){
+    boardEl.innerHTML = "";
+    for(var r=0; r<MAX_ROWS; r++){
+      var row = document.createElement("div");
+      row.className = "row";
+      row.id = "row-"+r;
+      for(var c=0; c<WORD_LEN; c++){
+        var tile = document.createElement("div");
+        tile.className = "tile";
+        tile.id = "tile-"+r+"-"+c;
+        row.appendChild(tile);
+      }
+      boardEl.appendChild(row);
+    }
+  }
+
+  function updateRowDisplay(){
+    for(var c=0; c<WORD_LEN; c++){
+      var tile = document.getElementById("tile-"+currentRow+"-"+c);
+      var letter = currentGuess[c] || "";
+      tile.textContent = letter;
+      tile.classList.toggle("filled", !!letter);
+    }
+  }
+
+
+  function checkHardMode(guess){
+    for(var r=0; r<results.length; r++){
+      var res = results[r];
+      var prevGuess = guesses[r];
+      for(var c=0; c<WORD_LEN; c++){
+        if(res[c] === "correct" && guess[c] !== prevGuess[c]){
+          return "La letra " + prevGuess[c] + " debe ir en la posición " + (c+1);
+        }
+      }
+      for(var c=0; c<WORD_LEN; c++){
+        if(res[c] === "present" && guess.indexOf(prevGuess[c]) === -1){
+          return "Tenés que incluir la letra " + prevGuess[c];
+        }
+      }
+    }
+    return null;
+  }
+
+  function showMsg(text){
+    msgEl.textContent = text;
+  }
+
+  function evaluateGuess(guess){
+    var result = new Array(WORD_LEN).fill("absent");
+    var secretArr = secret.split("");
+    var guessArr = guess.split("");
+    var used = new Array(WORD_LEN).fill(false);
+
+    for(var i=0;i<WORD_LEN;i++){
+      if(guessArr[i] === secretArr[i]){
+        result[i] = "correct";
+        used[i] = true;
+      }
+    }
+    for(var i=0;i<WORD_LEN;i++){
+      if(result[i] === "correct") continue;
+      for(var j=0;j<WORD_LEN;j++){
+        if(!used[j] && guessArr[i] === secretArr[j]){
+          result[i] = "present";
+          used[j] = true;
+          break;
+        }
+      }
+    }
+    return result;
+  }
+
+  function applyResultToRow(rowIndex, guess, result){
+    for(var c=0;c<WORD_LEN;c++){
+      (function(c){
+        var tile = document.getElementById("tile-"+rowIndex+"-"+c);
+        setTimeout(function(){
+          tile.classList.add("flip");
+          setTimeout(function(){
+            tile.classList.add(result[c]);
+          }, 250);
+        }, c*180);
+      })(c);
+    }
+    for(var c=0;c<WORD_LEN;c++){
+      var letter = guess[c];
+      var state = result[c];
+      var prev = keyStates[letter];
+      if(state === "correct" || (state === "present" && prev !== "correct") || (!prev)){
+        if(!(prev === "correct") ){
+          keyStates[letter] = state === "correct" ? "correct" : (state === "present" ? "present" : (prev || "absent"));
+        }
+      }
+      if(!keyStates[letter]) keyStates[letter] = state;
+      else{
+        if(state === "correct") keyStates[letter] = "correct";
+        else if(state === "present" && keyStates[letter] !== "correct") keyStates[letter] = "present";
+        else if(state === "absent" && !keyStates[letter]) keyStates[letter] = "absent";
+      }
+    }
+    setTimeout(paintKeyboard, WORD_LEN*180 + 260);
+  }
+
+  function paintKeyboard(){
+    var keys = document.querySelectorAll(".key");
+    keys.forEach(function(k){
+      var letter = (k.dataset.key||"").toUpperCase();
+      var state = keyStates[letter];
+      k.classList.remove("correct","present","absent");
+      if(state) k.classList.add(state);
+    });
+  }
+
+  function submitGuess(){
+    if(finished) return;
+    if(currentGuess.length !== WORD_LEN){
+      showMsg("Faltan letras");
+      return;
+    }
+    if(hardMode){
+      var problem = checkHardMode(currentGuess);
+      if(problem){
+        showMsg(problem);
+        return;
+      }
+    }
+    var result = evaluateGuess(currentGuess);
+    applyResultToRow(currentRow, currentGuess, result);
+    guesses.push(currentGuess);
+    results.push(result);
+
+    if(currentGuess === secret){
+      finished = true;
+      setTimeout(function(){
+        showMsg("¡Muy bien! Acertaste la palabra");
+        resetBtn.classList.add("show");
+      }, WORD_LEN*180 + 300);
+      return;
+    }
+
+    currentRow++;
+    currentGuess = "";
+    showMsg("");
+
+    if(currentRow >= MAX_ROWS){
+      finished = true;
+      setTimeout(function(){
+        showMsg("La palabra era " + secret);
+        resetBtn.classList.add("show");
+      }, WORD_LEN*180 + 300);
+    }
+  }
+
+  function handleKey(key){
+    if(finished) return;
+    key = key.toLowerCase();
+    if(key === "enter"){
+      submitGuess();
+    } else if(key === "back" || key === "backspace"){
+      currentGuess = currentGuess.slice(0, -1);
+      updateRowDisplay();
+      showMsg("");
+    } else if(/^[a-zñ]$/.test(key)){
+      if(currentGuess.length < WORD_LEN){
+        currentGuess += key.toUpperCase();
+        updateRowDisplay();
+        showMsg("");
+      }
+    }
+  }
+
+  document.getElementById("keyboard").addEventListener("click", function(e){
+    var btn = e.target.closest(".key");
+    if(!btn) return;
+    handleKey(btn.dataset.key);
+  });
+
+  document.addEventListener("keydown", function(e){
+    if(e.key === "Enter"){ handleKey("enter"); }
+    else if(e.key === "Backspace"){ handleKey("back"); }
+    else if(/^[a-zA-ZñÑ]$/.test(e.key)){ handleKey(e.key); }
+  });
+
+  resetBtn.addEventListener("click", function(){
+    currentRow = 0;
+    currentGuess = "";
+    finished = false;
+    guesses = [];
+    results = [];
+    keyStates = {};
+    resetBtn.classList.remove("show");
+    showMsg("");
+    buildBoard();
+    paintKeyboard();
+  });
+
+  buildBoard();
+})();
+</script>
+</body>
+</html>

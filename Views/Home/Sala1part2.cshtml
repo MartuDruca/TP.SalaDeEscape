@@ -1,0 +1,481 @@
+@{
+    ViewData["Title"] = "Sala 1 - Parte 2";
+}
+
+<style>
+    body, html {
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+    }
+
+    .container-full {
+        width: 100vw;
+        height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        position: relative;
+        background: linear-gradient(135deg, #e7a4de 0%, #fff8ff 100%);
+        font-family: 'Arial', sans-serif;
+    }
+
+    /* Carteles iniciales */
+    .welcome-signs {
+        position: absolute;
+        text-align: center;
+        opacity: 0;
+        animation: fadeInWelcome 1s ease-in forwards;
+        z-index: 10;
+    }
+
+    .welcome-signs.hide {
+        animation: fadeOutWelcome 0.5s ease-out forwards;
+    }
+
+    .sign-large {
+        font-size: 4rem;
+        font-weight: bold;
+        color: #fff3af;
+        text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.7);
+        margin-bottom: 2rem;
+    }
+
+    .sign-small {
+        font-size: 2rem;
+        color: #ffe293;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+    }
+
+    /* Cartel "¿Estás listo?" */
+    .ready-sign {
+        background: rgba(255, 255, 255, 0.8);
+        padding: 20px 40px;
+        position: absolute;
+        font-size: 3.5rem;
+        font-weight: bold;
+        color: #a1ffa1;
+        text-shadow: 3px 3px 8px rgba(0, 0, 0, 0.8);
+        opacity: 0;
+        z-index: 10;
+    }
+
+    .ready-sign.show {
+        animation: fadeInReady 0.8s ease-in forwards;
+    }
+
+    .ready-sign.hide {
+        animation: fadeOutReady 0.5s ease-out forwards;
+    }
+
+    /* Imagen a pantalla completa */
+    .full-screen-image {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        opacity: 0;
+        z-index: 8;
+    }
+
+    .full-screen-image.show {
+        animation: fadeInImage 0.5s ease-in forwards;
+    }
+
+    .full-screen-image.hide {
+        animation: fadeOutImage 0.5s ease-out forwards;
+    }
+
+    /* Tablero de ingredientes */
+    .ingredients-board {
+        position: absolute;
+        background: white;
+        border-radius: 15px;
+        padding: 30px;
+        box-shadow: 0 10px 50px rgba(0, 0, 0, 0.5);
+        opacity: 0;
+        z-index: 9;
+    }
+
+    .ingredients-board.show {
+        animation: fadeInBoard 0.8s ease-in forwards;
+    }
+
+    .ingredients-board.hide {
+        animation: fadeOutBoard 0.5s ease-out forwards;
+    }
+
+    .board-title {
+        font-size: 1.8rem;
+        font-weight: bold;
+        color: #333;
+        margin-bottom: 20px;
+        text-align: center;
+    }
+
+    .ingredients-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 120px);
+        gap: 15px;
+        margin-bottom: 20px;
+        justify-content: center;
+    }
+
+    .ingredient-item {
+        width: 120px;
+        height: 120px;
+        background: #f0f0f0;
+        border-radius: 10px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border: 2px solid #ddd;
+        overflow: hidden;
+    }
+
+    .ingredient-item img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .timer-display {
+        text-align: center;
+        font-size: 2rem;
+        font-weight: bold;
+        color: #ffa8de;
+        margin-bottom: 10px;
+    }
+
+    .timer-bar {
+        width: 100%;
+        height: 8px;
+        background: #e0e0e0;
+        border-radius: 4px;
+        overflow: hidden;
+        margin-bottom: 15px;
+    }
+
+    .timer-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #fff0c1, #FFD700);
+        width: 100%;
+        animation: timerFill 4s linear forwards;
+    }
+
+    /* Sección de respuesta */
+    .answer-section {
+        position: absolute;
+        display: none;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 18px;
+        padding: 30px 40px;
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
+        width: min(620px, 80vw);
+        z-index: 12;
+    }
+
+    .answer-section.show {
+        display: flex;
+        animation: fadeInBoard 0.6s ease-in forwards;
+    }
+
+    .answer-question {
+        font-size: 2rem;
+        font-weight: bold;
+        color: #2d2d2d;
+        text-align: center;
+        margin-bottom: 20px;
+    }
+
+    .answer-input {
+        width: 100%;
+        padding: 16px 18px;
+        border-radius: 12px;
+        border: 2px solid #d1d5db;
+        font-size: 1.2rem;
+        outline: none;
+        margin-bottom: 18px;
+    }
+
+    .answer-input:focus {
+        border-color: #f1bddd;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+    }
+
+    .answer-button {
+        background: linear-gradient(135deg, #fac534, #dfa5d5);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        padding: 12px 24px;
+        font-size: 1.1rem;
+        font-weight: bold;
+        cursor: pointer;
+    }
+
+    .answer-button:hover {
+        filter: brightness(1.05);
+    }
+
+    .answer-status {
+        margin-top: 16px;
+        font-size: 1.1rem;
+        font-weight: bold;
+        min-height: 24px;
+    }
+
+    .answer-status.correct {
+        color: #8edfa9;
+    }
+
+    .answer-status.wrong {
+        color: #ec6161;
+    }
+
+    /* Animaciones */
+    @@keyframes fadeInWelcome {
+        from {
+            opacity: 0;
+            transform: scale(0.8);
+        }
+        to {
+            opacity: 1;
+            transform: scale(1);
+        }
+    }
+
+    @@keyframes fadeOutWelcome {
+        from {
+            opacity: 1;
+            transform: scale(1);
+        }
+        to {
+            opacity: 0;
+            transform: scale(0.8);
+        }
+    }
+
+    @@keyframes fadeInReady {
+        from {
+            opacity: 0;
+            transform: translateY(-50px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @@keyframes fadeOutReady {
+        from {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        to {
+            opacity: 0;
+            transform: translateY(-50px);
+        }
+    }
+
+    @@keyframes fadeInImage {
+        from {
+            opacity: 0;
+        }
+        to {
+            opacity: 1;
+        }
+    }
+
+    @@keyframes fadeOutImage {
+        from {
+            opacity: 1;
+        }
+        to {
+            opacity: 0;
+        }
+    }
+
+    @@keyframes fadeInBoard {
+        from {
+            opacity: 0;
+            transform: scale(0.9);
+        }
+        to {
+            opacity: 1;
+            transform: scale(1);
+        }
+    }
+
+    @@keyframes fadeOutBoard {
+        from {
+            opacity: 1;
+            transform: scale(1);
+        }
+        to {
+            opacity: 0;
+            transform: scale(0.9);
+        }
+    }
+
+    @@keyframes timerFill {
+        from {
+            width: 100%;
+        }
+        to {
+            width: 0%;
+        }
+    }
+</style>
+
+<div class="container-full">
+    <!-- Carteles iniciales -->
+    <div class="welcome-signs" id="welcomeSigns">
+        <div class="sign-large">¡Bienvenido al segundo desafío!</div>
+        <div class="sign-small">¡Presta mucha atención!</div>
+    </div>
+
+    <!-- Cartel "¿Estás listo?" -->
+    <div class="ready-sign" id="readySign">¿Estás listo?</div>
+
+    <!-- Imagen a pantalla completa -->
+    <img class="full-screen-image" id="fullScreenImage" src="" alt="Ingredientes">
+
+    <!-- Tablero de ingredientes -->
+    <div class="ingredients-board" id="ingredientsBoard">
+        <div class="board-title">Memoriza los ingredientes IMPORTANTES</div>
+        <div class="timer-display" id="timerDisplay">4</div>
+        <div class="timer-bar">
+            <div class="timer-fill" id="timerFill"></div>
+        </div>
+        <div class="ingredients-grid" id="ingredientsGrid">
+            <!-- Los ingredientes se cargarán aquí con JavaScript -->
+        </div>
+    </div>
+
+    <div class="answer-section" id="answerSection">
+        <div class="answer-question">¿Cuál de los ingredientes que viste es necesario para la receta?</div>
+        <input type="text" id="answerInput" class="answer-input" placeholder="Escribí tu respuesta" />
+        <button type="button" class="answer-button" id="answerButton">Comprobar</button>
+        <div id="answerStatus" class="answer-status"></div>
+    </div>
+</div>
+
+<script>
+    // Array con URLs de las imágenes (reemplazar con rutas reales)
+    const ingredientImages = [
+        '/ingrediente1.jpg',
+        '/ingrediente2.jpg',
+        '/ingrediente3.jpg',
+        '/ingrediente4.jpg',
+        '/ingrediente5.jpg',
+        '/ingrediente6.jpg',
+        '/ingrediente7.jpg',
+        '/ingrediente8.jpg'
+    ];
+
+    // URL de la imagen de pantalla completa (reemplazar con ruta real)
+    const fullScreenImageUrl = '/llamada.png';
+
+    function startSequence() {
+        const welcomeSigns = document.getElementById('welcomeSigns');
+        
+        setTimeout(() => {
+            welcomeSigns.classList.add('hide');
+            
+            setTimeout(() => {
+                welcomeSigns.style.display = 'none';
+                const readySign = document.getElementById('readySign');
+                readySign.classList.add('show');
+
+                const fullScreenImage = document.getElementById('fullScreenImage');
+                fullScreenImage.src = fullScreenImageUrl;
+                fullScreenImage.classList.add('show');
+
+                setTimeout(() => {
+                    fullScreenImage.classList.add('hide');
+                    readySign.classList.add('hide');
+
+                    setTimeout(() => {
+                        readySign.style.display = 'none';
+                        fullScreenImage.style.display = 'none';
+
+                        const ingredientsBoard = document.getElementById('ingredientsBoard');
+                        ingredientsBoard.classList.add('show');
+
+                        const grid = document.getElementById('ingredientsGrid');
+                        ingredientImages.forEach(imageSrc => {
+                            const div = document.createElement('div');
+                            div.className = 'ingredient-item';
+                            const img = document.createElement('img');
+                            img.src = imageSrc;
+                            img.alt = 'Ingrediente';
+                            div.appendChild(img);
+                            grid.appendChild(div);
+                        });
+
+                        startTimer();
+                    }, 500);
+                }, 3000);
+            }, 500);
+        }, 3000);
+    }
+
+    function startTimer() {
+        let timeRemaining = 4;
+        const timerDisplay = document.getElementById('timerDisplay');
+
+        const countdown = setInterval(() => {
+            timeRemaining--;
+            timerDisplay.textContent = timeRemaining;
+
+            if (timeRemaining <= 0) {
+                clearInterval(countdown);
+                hideBoard();
+            }
+        }, 1000);
+    }
+
+    function hideBoard() {
+        const ingredientsBoard = document.getElementById('ingredientsBoard');
+        ingredientsBoard.classList.add('hide');
+
+        setTimeout(() => {
+            ingredientsBoard.style.display = 'none';
+            showAnswerSection();
+        }, 500);
+    }
+
+    function showAnswerSection() {
+        const answerSection = document.getElementById('answerSection');
+        answerSection.classList.add('show');
+
+        const answerButton = document.getElementById('answerButton');
+        answerButton.addEventListener('click', validateAnswer);
+    }
+
+    function validateAnswer() {
+        const input = document.getElementById('answerInput');
+        const status = document.getElementById('answerStatus');
+        const value = input.value.trim().toLowerCase();
+
+        if (value === 'sal') {
+            status.textContent = '¡Correcto! Ese ingrediente es el necesario para la receta.';
+            status.className = 'answer-status correct';
+            input.disabled = true;
+            document.getElementById('answerButton').disabled = true;
+            
+            return;
+        }
+
+        status.textContent = 'Está mal. Podés probar de nuevo.';
+        status.className = 'answer-status wrong';
+        input.value = '';
+        input.focus();
+    }
+
+    document.addEventListener('DOMContentLoaded', startSequence);
+</script>
