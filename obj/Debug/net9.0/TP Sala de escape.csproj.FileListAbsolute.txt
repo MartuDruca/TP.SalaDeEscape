@@ -91,8 +91,8 @@ Z:\2026\prog\TP Sala de escape\obj\Debug\net9.0\TP Sala de escape.pdb
 Z:\2026\prog\TP Sala de escape\obj\Debug\net9.0\TP Sala de escape.genruntimeconfig.cache
 Z:\2026\prog\TP Sala de escape\obj\Debug\net9.0\ref\TP Sala de escape.dll
 Z:\2026\prog\TP Sala de escape\obj\Debug\net9.0\TP Sala de escape.csproj.AssemblyReference.cache
-Z:\2026\prog\TP Sala de escape\obj\Debug\net9.0\compressed\zdnh1qi6pa-m51za5v81k.gz
 Z:\2026\prog\TP Sala de escape\obj\Debug\net9.0\scopedcss\Views\Shared\_Layout.cshtml.rz.scp.css
 Z:\2026\prog\TP Sala de escape\obj\Debug\net9.0\scopedcss\projectbundle\TP Sala de escape.bundle.scp.css
-Z:\2026\prog\TP Sala de escape\obj\Debug\net9.0\compressed\za7wb20b4d-z6uvun41xu.gz
-Z:\2026\prog\TP Sala de escape\obj\Debug\net9.0\compressed\x9g70kteqz-z6uvun41xu.gz
+Z:\2026\prog\TP Sala de escape\obj\Debug\net9.0\compressed\za7wb20b4d-snyzdx02xh.gz
+Z:\2026\prog\TP Sala de escape\obj\Debug\net9.0\compressed\x9g70kteqz-snyzdx02xh.gz
+Z:\2026\prog\TP Sala de escape\obj\Debug\net9.0\compressed\zdnh1qi6pa-qeotrir7pl.gz

@@ -245,11 +245,54 @@ class PuzzleGame {
     checkCompletion() {
         const allPlaced = this.pieces.every(p => p.placed);
         if (allPlaced) {
-            this.completionMessage.classList.remove('d-none');
-            setTimeout(() => {
-                this.completionMessage.classList.add('d-none');
-            }, 4000);
+            this.showCompletionImage();
         }
+    }
+    
+    showCompletionImage() {
+        const canvas = document.createElement('canvas');
+        canvas.width = this.boardWidth;
+        canvas.height = this.boardHeight;
+        const ctx = canvas.getContext('2d');
+        
+        const img = new Image();
+        img.crossOrigin = "anonymous";
+        img.onload = () => {
+            ctx.drawImage(img, 0, 0, this.boardWidth, this.boardHeight);
+            // Mostrar la imagen completa en un overlay a pantalla completa
+            const fullImgSrc = canvas.toDataURL();
+
+            // Ocultar las piezas disponibles
+            this.piecesAreaElement.innerHTML = '';
+
+            // Mostrar mensaje de completado permanentemente
+            this.completionMessage.classList.remove('d-none');
+
+            // Crear overlay con caption
+            const overlay = document.createElement('div');
+            overlay.className = 'image-overlay';
+
+            const caption = document.createElement('div');
+            caption.className = 'overlay-caption';
+            caption.textContent = 'acordate bien';
+
+            const imgEl = document.createElement('img');
+            imgEl.className = 'image-overlay-img';
+            imgEl.src = fullImgSrc;
+            imgEl.alt = 'Imagen completa';
+
+            // Cerrar overlay al hacer click fuera de la imagen o en la imagen
+            overlay.addEventListener('click', (e) => {
+                if (e.target === overlay || e.target === imgEl) {
+                    overlay.remove();
+                }
+            });
+
+            overlay.appendChild(caption);
+            overlay.appendChild(imgEl);
+            document.body.appendChild(overlay);
+        };
+        img.src = this.imageUrl;
     }
     
     reset() {

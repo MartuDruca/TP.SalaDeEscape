@@ -34,27 +34,30 @@
     }
 
     .sign-large {
+        font-family: 'Times new roman';
         font-size: 4rem;
         font-weight: bold;
-        color: #fff3af;
+        color: #ff00bf;
         text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.7);
         margin-bottom: 2rem;
     }
 
     .sign-small {
+        font-family: 'Times new roman';
         font-size: 2rem;
-        color: #ffe293;
+        color: #ffb7ef;
         text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
     }
 
     /* Cartel "¿Estás listo?" */
     .ready-sign {
-        background: rgba(255, 255, 255, 0.8);
+        font-family: 'Times new roman';
+        background: rgba(178, 190, 173, 0.46);
         padding: 20px 40px;
         position: absolute;
         font-size: 3.5rem;
         font-weight: bold;
-        color: #a1ffa1;
+        color: #bdeebf;
         text-shadow: 3px 3px 8px rgba(0, 0, 0, 0.8);
         opacity: 0;
         z-index: 10;
@@ -221,6 +224,28 @@
         filter: brightness(1.05);
     }
 
+    .next-button {
+        display: none;
+        margin-top: 18px;
+        background: linear-gradient(135deg, #fac534, #dfa5d5);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        padding: 12px 24px;
+        font-size: 1.1rem;
+        font-weight: bold;
+        text-decoration: none;
+        cursor: pointer;
+    }
+
+    .next-button.show {
+        display: inline-block;
+    }
+
+    .next-button:hover {
+        filter: brightness(1.05);
+    }
+
     .answer-status {
         margin-top: 16px;
         font-size: 1.1rem;
@@ -346,7 +371,7 @@
 
     <!-- Tablero de ingredientes -->
     <div class="ingredients-board" id="ingredientsBoard">
-        <div class="board-title">Memoriza los ingredientes IMPORTANTES</div>
+        <div class="board-title">Encontrá el ingrediente dentro de la receta!</div>
         <div class="timer-display" id="timerDisplay">4</div>
         <div class="timer-bar">
             <div class="timer-fill" id="timerFill"></div>
@@ -360,6 +385,7 @@
         <div class="answer-question">¿Cuál de los ingredientes que viste es necesario para la receta?</div>
         <input type="text" id="answerInput" class="answer-input" placeholder="Escribí tu respuesta" />
         <button type="button" class="answer-button" id="answerButton">Comprobar</button>
+        <a asp-controller="Home" asp-action="CompletarSala1" class="next-button" id="nextButton">Ir a la Sala 2</a>
         <div id="answerStatus" class="answer-status"></div>
     </div>
 </div>
@@ -460,6 +486,7 @@
     function validateAnswer() {
         const input = document.getElementById('answerInput');
         const status = document.getElementById('answerStatus');
+        const nextButton = document.getElementById('nextButton');
         const value = input.value.trim().toLowerCase();
 
         if (value === 'sal') {
@@ -467,12 +494,13 @@
             status.className = 'answer-status correct';
             input.disabled = true;
             document.getElementById('answerButton').disabled = true;
-            
+            nextButton.classList.add('show');
             return;
         }
 
         status.textContent = 'Está mal. Podés probar de nuevo.';
         status.className = 'answer-status wrong';
+        nextButton.classList.remove('show');
         input.value = '';
         input.focus();
     }

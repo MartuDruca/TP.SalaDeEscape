@@ -17,8 +17,16 @@ html {
   min-height: 100%;
 }
 
+html, body {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+}
+
 body {
-  margin-bottom: 60px;
+    margin-bottom: 0;
 }
 
 .form-floating > .form-control-plaintext::placeholder, .form-floating > .form-control::placeholder {
@@ -37,7 +45,7 @@ body {
   --intro-text-color: #fff8eb;
   --intro-button-1: #ff7b54;
   --intro-button-2: #ffd166;
-  --intro-button-3: #7bdff2;
+  --intro-button-3: #f27bc4;
 }
 
 .introduccion-page {
@@ -325,10 +333,45 @@ body {
 /* ===== PUZZLE GAME STYLES ===== */
 
 .puzzle-container {
+    width: 100vw;
+    height: 100vh;
+    min-height: 100vh;
+    margin: 0;
+    padding: 0;
+    background: linear-gradient(135deg, #ec92ca 0%, #ad4284 100%);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    overflow: auto;
+}
+
+/* Tema compartido para las salas - coherente con Sala1 */
+.sala-theme {
   min-height: 100vh;
   background: linear-gradient(135deg, #ec92ca 0%, #ad4284 100%);
-  padding: 40px 20px;
+  color: #fff8eb;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.sala-theme .sala2-card,
+.sala-theme .sala3-card,
+.sala-theme .sala4-card,
+.sala-theme .salas-header,
+.sala-theme .sala2-card, .sala-theme .sala3-card, .sala-theme .sala4-card {
+  background: rgba(46, 24, 18, 0.74);
+  border: 2px solid rgba(255, 224, 168, 0.45);
+  border-radius: 20px;
+  box-shadow: 0 20px 40px rgba(13, 7, 4, 0.38);
+  color: #fff8eb;
+}
+
+.sala-theme .sala2-kicker,
+.sala-theme .sala3-kicker,
+.sala-theme .sala4-kicker,
+.sala-theme .salas-kicker {
+  color: #ffd166;
+}
+
+.sala-theme .next-button {
+  background: linear-gradient(135deg, #ff7b54 0%, #ffd166 100%);
 }
 
 .puzzle-header {
@@ -515,7 +558,7 @@ body {
 }
 
 .celebration {
-  background: linear-gradient(135deg, #84fab0 0%, #3daf63 100%);
+  background: linear-gradient(135deg, #fc825c 0%, #dba736 100%);
   padding: 30px 50px;
   border-radius: 15px;
   box-shadow: 0 15px 40px rgba(0,0,0,0.2);
@@ -681,18 +724,20 @@ body {
     --radius: 18px;
   }
   *{ box-sizing: border-box; }
-  html, body{
-    margin:0; padding:0; min-height:100%;
+ .sala3-page {
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
     background:
       radial-gradient(ellipse 900px 500px at 15% 10%, rgba(240,168,56,0.20), transparent 60%),
       radial-gradient(ellipse 700px 500px at 85% 90%, rgba(126,64,30,0.35), transparent 60%),
       linear-gradient(160deg, var(--bg-1), var(--bg-2));
     color: var(--ink);
     font-family: 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-  }
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
   .app{
     width: 100%;
     max-width: 440px;
@@ -785,6 +830,36 @@ body {
     gap: 7px;
     width: 100%;
   }
+/* Overlay para mostrar imagen completa */
+.image-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.85);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  z-index: 9999;
+  padding: 20px;
+}
+.image-overlay-img {
+  max-width: 98vw;
+  max-height: calc(100vh - 140px);
+  object-fit: contain;
+  border-radius: 8px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+  cursor: zoom-out;
+}
+.overlay-caption {
+  color: #fff;
+  font-size: clamp(18px, 3vw, 36px);
+  font-weight: 800;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+  text-shadow: 0 6px 18px rgba(0,0,0,0.6);
+  pointer-events: none;
+}
   .krow{
     display:flex;
     justify-content:center;

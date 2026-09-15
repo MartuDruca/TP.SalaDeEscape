@@ -2,7 +2,7 @@
     ViewData["Title"] = "Sala 2";
 }
 
-<div class="sala2-layout">
+<div class="sala2-layout sala-theme">
     <div class="sala2-card">
         <p class="sala2-kicker">Sala 2 · El despensa oculta</p>
         <h1>Pista secreta</h1>
@@ -10,13 +10,46 @@
             Observá la imagen y hacé click 
         </p>
 
-        <div class="image-puzzle" id="imagePuzzle" aria-label="Imagen de la pista oculta" tabindex="0">
-            <img src='wwwroot/huevos.jpg' alt="Imagen de la sala 2" />
-            <div class="grid-overlay" aria-hidden="true"></div>
+        <div class="sala2-content">
+            <div class="envelope-container" aria-hidden="false">
+                <button class="envelope" id="openEnvelope" aria-expanded="false" aria-controls="envelopePanel" title="Abrir sobre de pistas">
+                    <span class="env-flap"></span>
+                </button>
+
+                <div class="envelope-panel" id="envelopePanel" role="dialog" aria-labelledby="envelopeTitle" aria-hidden="true">
+                    <h3 id="envelopeTitle">pistas para encontrar el huevo</h3>
+                    <ul>
+                        <li>Pista 1: “Su posición es un número par.”</li>
+                        <li>Pista 2: “Si numerás los huevos de izquierda a derecha y de arriba abajo, su número es múltiplo de 8.”</li>
+                        <li>Pista 3: “La columna donde se encuentra tiene un número par.”</li>
+                        <li>Pista 4: “Sumá el número de su fila y el de su columna: da 9.”</li>
+                    </ul>
+                    <button class="close-envelope" id="closeEnvelope">Cerrar</button>
+                </div>
+            </div>
+
+            <div class="image-puzzle no-overlay" id="imagePuzzle" aria-label="Imagen de la pista oculta" tabindex="0">
+                <img src='/huevos.png' alt="Imagen de la sala 2" />
+                <div class="grid-overlay" aria-hidden="true"></div>
+                <div id="eggReveal" class="egg-reveal hidden" aria-live="polite">40</div>
+                <button type="button" id="secretRoomButton" class="secret-room-button" aria-label="Ir a la sala 3">
+                    sala
+                </button>
+            </div>
+
+            
+            <aside class="rules-box" aria-labelledby="rulesTitle">
+                <h3 id="rulesTitle">reglas del juego</h3>
+                <ul>
+                    <li>Regla 1: Tenés 5 intentos para encontrar el huevo verdadero siguiendo las pistas dadas y pasar al siguiente desafío</li>
+                    
+                </ul>
+            </aside>
         </div>
 
         <p id="message" class="message">Sigue buscando…</p>
-        <a id="nextButton" class="next-button hidden" asp-controller="Home" asp-action="Sala3">Siguiente desafío</a>
+        <div id="lives" class="lives">Vidas: <span id="livesCount">5</span></div>
+        <a id="nextButton" class="next-button hidden" asp-controller="Home" asp-action="CompletarSala2">Siguiente desafío</a>
     </div>
 </div>
 
@@ -94,7 +127,7 @@
         position: absolute;
         inset: 0;
         display: grid;
-        grid-template-columns: repeat(3, 1fr);
+        grid-template-columns: repeat(8, 1fr);
         grid-template-rows: repeat(5, 1fr);
         pointer-events: none;
     }
@@ -108,6 +141,11 @@
         margin: 6px;
         background: rgba(250, 204, 21, 0.12);
         box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.25);
+    }
+
+    /* Ocultar el recuadro amarillo para la imagen de huevos */
+    .image-puzzle.no-overlay .grid-overlay::before {
+        display: none;
     }
 
     .message {
@@ -144,6 +182,178 @@
     .hidden {
         display: none;
     }
+
+    /* Nuevos estilos: sobre de pistas y recuadro de reglas */
+    .sala2-content {
+        display: flex;
+        gap: 18px;
+        align-items: flex-start;
+        justify-content: center;
+        flex-wrap: wrap;
+        margin-top: 18px;
+    }
+
+    .sala2-content > * {
+        min-width: 0;
+    }
+
+    .envelope-container {
+        width: 140px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        position: relative;
+    }
+
+    .envelope {
+        width: 120px;
+        height: 80px;
+        background: #fff;
+        border-radius: 8px;
+        border: 2px solid rgba(0,0,0,0.08);
+        position: relative;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+    }
+
+    .envelope .env-flap {
+        position: absolute;
+        top: 8px;
+        left: 12px;
+        right: 12px;
+        height: 0;
+        border-left: 48px solid transparent;
+        border-right: 48px solid transparent;
+        border-bottom: 26px solid #f7f7f7;
+        border-radius: 4px;
+        box-shadow: 0 6px 12px rgba(0,0,0,0.06) inset;
+    }
+
+    .envelope-panel {
+        position: absolute;
+        top: 100px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 260px;
+        background: #ffffff;
+        color: #111827;
+        border-radius: 12px;
+        padding: 14px;
+        box-shadow: 0 18px 50px rgba(0,0,0,0.35);
+        border: 1px solid rgba(0,0,0,0.06);
+        display: none;
+        z-index: 50;
+    }
+
+    .envelope-panel h3 {
+        margin: 0 0 8px 0;
+        text-transform: lowercase;
+        font-size: 1rem;
+        font-weight: 800;
+    }
+
+    .envelope-panel ul { margin: 0 0 10px 18px; }
+
+    .envelope-panel .close-envelope {
+        display: inline-block;
+        padding: 6px 10px;
+        background: linear-gradient(135deg,#f093fb,#eea8b1);
+        color: #fff;
+        border-radius: 10px;
+        border: none;
+        cursor: pointer;
+        font-weight: 700;
+    }
+
+    .envelope-panel.open { display: block; }
+
+    .rules-box {
+        width: 100%;
+        flex: 1 1 220px;
+        background: rgba(255,255,255,0.06);
+        border-radius: 12px;
+        padding: 12px;
+        color: #fff8eb;
+        border: 1px solid rgba(255,224,168,0.12);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+        overflow-wrap: anywhere;
+        word-break: break-word;
+    }
+
+    .rules-box h3 { margin: 0 0 8px 0; text-transform: lowercase; }
+
+    .rules-box ul {
+        margin: 0;
+        padding-left: 18px;
+    }
+
+    .rules-box li {
+        line-height: 1.5;
+        margin-bottom: 8px;
+    }
+
+    .lives {
+        margin-top: 12px;
+        font-weight: 800;
+        color: #ffd166;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+    }
+
+    .penalty-timer {
+        display: inline-block;
+        margin-left: 8px;
+        color: #ffb4b4;
+        font-weight: 700;
+    }
+
+    .egg-reveal {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: clamp(3rem, 8vw, 7rem);
+        font-weight: 900;
+        color: #facc15;
+        text-shadow: 0 0 20px rgba(250, 204, 21, 0.7);
+        background: rgba(15, 23, 42, 0.32);
+        pointer-events: none;
+    }
+
+    .egg-reveal.hidden {
+        display: none;
+    }
+
+    .secret-room-button {
+        margin-bottom: 13.5%;
+        margin-right: 10%;
+        position: absolute;
+        left: 37%;
+        bottom: 18px;
+        z-index: 10;
+        border: none;
+        border-radius: 999px;
+        background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+        color: #fff;
+        font-weight: 800;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        box-shadow: 0 8px 20px rgba(34, 197, 94, 0.35);
+        cursor: pointer;
+        opacity: 0;
+    }
+
+    .secret-room-button:hover {
+        filter: brightness(1.08);
+    }
+
+    .secret-room-button.hidden {
+        display: none;
+    }
 </style>
 
 <script>
@@ -151,11 +361,15 @@
         const puzzle = document.getElementById("imagePuzzle");
         const message = document.getElementById("message");
         const nextButton = document.getElementById("nextButton");
+        const livesCountEl = document.getElementById('livesCount');
+        const livesEl = document.getElementById('lives');
+        const eggReveal = document.getElementById('eggReveal');
 
-        const cols = 3;
+        // Ajuste de cuadrícula para 40 huevos (8 columnas x 5 filas)
+        const cols = 8;
         const rows = 5;
-        const targetCol = 1;
-        const targetRow = 3;
+        // Huevo correcto: número 40 (índice 39, 0-based)
+        const targetIndex = 39;
 
         function getCellFromClick(event) {
             const rect = puzzle.getBoundingClientRect();
@@ -171,20 +385,137 @@
             return { col, row };
         }
 
-        puzzle.addEventListener("click", function (event) {
-            const cell = getCellFromClick(event);
+        // Game mechanics: vidas, huevos incorrectos y huevo especial
+        const totalCells = cols * rows;
+        if (targetIndex >= totalCells) {
+            console.warn('targetIndex fuera de rango, ajustando al último índice');
+        }
 
-            if (cell.col === targetCol && cell.row === targetRow) {
-                message.textContent = "¡Correcto! La pista ha sido desbloqueada.";
-                message.classList.add("success");
-                nextButton.classList.remove("hidden");
-                puzzle.setAttribute("aria-label", "La pista ha sido encontrada");
+        function shuffle(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        // Build list of candidate cell indices excluding the target
+        const candidates = [];
+        for (let r = 0; r < rows; r++) {
+            for (let c = 0; c < cols; c++) {
+                const idx = r * cols + c;
+                if (idx !== targetIndex) candidates.push(idx);
+            }
+        }
+
+        shuffle(candidates);
+
+        // Pick one special egg that gives a life
+        const specialIndex = candidates.splice(Math.floor(Math.random() * candidates.length), 1)[0];
+
+        // Pick a random number of incorrect eggs (1..5)
+        const incorrectCount = Math.min(5, Math.max(1, Math.floor(Math.random() * 5) + 1));
+        shuffle(candidates);
+        const incorrectSet = new Set(candidates.slice(0, incorrectCount));
+
+        const clickedIncorrect = new Set();
+        let specialUsed = false;
+
+        let lives = 5;
+        let gameOver = false;
+        let penaltyActive = false;
+        let penaltyRemaining = 0;
+        let penaltyInterval = null;
+
+        function updateLives() {
+            livesCountEl.textContent = lives;
+        }
+
+        updateLives();
+
+        function startPenalty() {
+            penaltyActive = true;
+            penaltyRemaining = 15;
+            let timer = document.getElementById('penaltyTimer');
+            if (!timer) {
+                timer = document.createElement('span');
+                timer.id = 'penaltyTimer';
+                timer.className = 'penalty-timer';
+                livesEl.appendChild(timer);
+            }
+            timer.textContent = `Penalización: ${penaltyRemaining}s`;
+
+            penaltyInterval = setInterval(() => {
+                penaltyRemaining -= 1;
+                if (penaltyRemaining <= 0) {
+                    clearInterval(penaltyInterval);
+                    penaltyInterval = null;
+                    penaltyActive = false;
+                    const t = document.getElementById('penaltyTimer');
+                    t && t.remove();
+                    message.textContent = 'Ya podés seguir buscando.';
+                } else {
+                    const t = document.getElementById('penaltyTimer');
+                    if (t) t.textContent = `Penalización: ${penaltyRemaining}s`;
+                }
+            }, 1000);
+        }
+
+        puzzle.addEventListener("click", function (event) {
+            if (gameOver) return;
+            if (penaltyActive) {
+                message.textContent = `Penalizado: espera ${penaltyRemaining}s`;
                 return;
             }
 
-            message.textContent = "No es ahí. La pista está en la columna del medio y la anteúltima fila.";
-            message.classList.remove("success");
-            nextButton.classList.add("hidden");
+            const cell = getCellFromClick(event);
+            const idx = cell.row * cols + cell.col;
+
+            if (idx === targetIndex) {
+                message.textContent = "¡Correcto! Encontraste el huevo número 40.";
+                message.classList.add("success");
+                if (eggReveal) {
+                    eggReveal.classList.remove("hidden");
+                }
+                nextButton.classList.remove("hidden");
+                puzzle.setAttribute("aria-label", "La pista ha sido encontrada");
+                gameOver = true;
+                return;
+            }
+
+            // Special life egg
+            if (idx === specialIndex && !specialUsed) {
+                specialUsed = true;
+                lives += 1;
+                updateLives();
+                message.textContent = "Encontraste un huevo especial: +1 vida";
+                message.classList.remove("success");
+                return;
+            }
+
+            // Incorrect egg
+            if (incorrectSet.has(idx)) {
+                if (clickedIncorrect.has(idx)) {
+                    message.textContent = "Ese huevo ya lo probaste, no sirve.";
+                    message.classList.remove("success");
+                    return;
+                }
+
+                clickedIncorrect.add(idx);
+                lives -= 1;
+                updateLives();
+                message.textContent = "Huevos incorrecto. Penalización de 15s.";
+                message.classList.remove("success");
+
+                if (lives <= 0) {
+                    gameOver = true;
+                    message.textContent = "Te quedaste sin vidas. Fin del juego.";
+                    nextButton.classList.add("hidden");
+                    return;
+                }
+
+                startPenalty();
+                return;
+
         });
 
         puzzle.addEventListener("keydown", function (event) {
@@ -193,5 +524,60 @@
                 puzzle.click();
             }
         });
+    })();
+    // Envío: lógica del sobre de pistas
+    (function () {
+        const openBtn = document.getElementById('openEnvelope');
+        const panel = document.getElementById('envelopePanel');
+        const closeBtn = document.getElementById('closeEnvelope');
+
+        if (!openBtn || !panel) return;
+
+        function openPanel() {
+            panel.classList.add('open');
+            panel.setAttribute('aria-hidden', 'false');
+            openBtn.setAttribute('aria-expanded', 'true');
+        }
+
+        function closePanel() {
+            panel.classList.remove('open');
+            panel.setAttribute('aria-hidden', 'true');
+            openBtn.setAttribute('aria-expanded', 'false');
+        }
+
+        openBtn.addEventListener('click', function (e) {
+            e.stopPropagation();
+            if (panel.classList.contains('open')) closePanel(); else openPanel();
+        });
+
+        closeBtn && closeBtn.addEventListener('click', function (e) {
+            e.stopPropagation();
+            closePanel();
+        });
+
+        // cerrar al hacer click fuera
+        document.addEventListener('click', function (e) {
+            if (!panel.contains(e.target) && e.target !== openBtn) {
+                closePanel();
+            }
+        });
+
+        // accesibilidad: Esc cierra
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape') closePanel();
+        });
+    })();
+
+    // Nueva lógica para el botón de sala secreta
+    (function () {
+        const secretButton = document.getElementById('secretRoomButton');
+
+        if (secretButton) {
+            secretButton.addEventListener('click', function (event) {
+                event.preventDefault();
+                event.stopPropagation();
+                window.location.href = '@Url.Action("ResultadoSala2", "Home")';
+            });
+        }
     })();
 </script>

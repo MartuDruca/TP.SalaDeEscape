@@ -7,11 +7,32 @@ namespace TP_Sala_de_escape.Controllers;
 
 public class HomeController : Controller
 {
+    private const string SalaUnlockedKey = "SalaUnlocked";
     private readonly ILogger<HomeController> _logger;
 
     public HomeController(ILogger<HomeController> logger)
     {
         _logger = logger;
+    }
+
+    private int ObtenerSalaDesbloqueada()
+    {
+        return 3;
+    }
+
+    private void GuardarSalaDesbloqueada(int sala)
+    {
+        HttpContext.Session.SetInt32(SalaUnlockedKey, int.MaxValue);
+    }
+
+    private IActionResult? ValidarSala(int salaRequerida)
+    {
+        if (ObtenerSalaDesbloqueada() < salaRequerida)
+        {
+            return RedirectToAction("Salas");
+        }
+
+        return null;
     }
 
     public IActionResult Index()
@@ -47,6 +68,28 @@ public class HomeController : Controller
         return View("salas");
     }
 
+    public IActionResult CompletarSala1()
+    {
+        GuardarSalaDesbloqueada(2);
+        return RedirectToAction("Sala2");
+    }
+
+    public IActionResult ResultadoSala2(string respuesta)
+    {
+        return View("Sala2part2");
+    }
+    public IActionResult CompletarSala2()
+    {
+        GuardarSalaDesbloqueada(3);
+        return RedirectToAction("Sala3");
+    }
+
+    public IActionResult CompletarSala3()
+    {
+        GuardarSalaDesbloqueada(4);
+        return RedirectToAction("Sala4");
+    }
+
     public IActionResult Introduccion(){
         return View("Sala1");
     }
@@ -57,15 +100,33 @@ public class HomeController : Controller
 
     public IActionResult Sala2()
     {
+        var bloqueo = ValidarSala(2);
+        if (bloqueo != null)
+        {
+            return bloqueo;
+        }
+
         return View("Sala2");
     }
 
     public IActionResult Sala3(){
+        var bloqueo = ValidarSala(3);
+        if (bloqueo != null)
+        {
+            return bloqueo;
+        }
+
         return View("Sala3");
     }
 
     public IActionResult Sala4()
     {
+        var bloqueo = ValidarSala(4);
+        if (bloqueo != null)
+        {
+            return bloqueo;
+        }
+
         return View("Sala4");
     }
 

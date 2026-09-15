@@ -8,7 +8,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
 
 </head>
-<body>
+<body class="sala3-page sala-theme">
 <div class="app">
   <header>
     <div class="eyebrow">Sala 3 · La cocina vacía</div>
@@ -21,6 +21,7 @@
   <div class="board" id="board"></div>
   <div class="msg" id="msg"></div>
   <button class="reset" id="resetBtn">Jugar de nuevo</button>
+  <a class="next-button hidden" id="nextSalaButton" asp-controller="Home" asp-action="Sala3">Siguiente puzzle</a>
 
   <div class="keyboard" id="keyboard">
     <div class="krow">
@@ -251,6 +252,7 @@
   var boardEl = document.getElementById("board");
   var msgEl = document.getElementById("msg");
   var resetBtn = document.getElementById("resetBtn");
+  var nextSalaButton = document.getElementById("nextSalaButton");
   var keyStates = {};
 
   function buildBoard(){
@@ -390,6 +392,7 @@
       setTimeout(function(){
         showMsg("¡Muy bien! Acertaste la palabra");
         resetBtn.classList.add("show");
+        nextSalaButton.classList.remove("hidden");
       }, WORD_LEN*180 + 300);
       return;
     }
@@ -401,7 +404,7 @@
     if(currentRow >= MAX_ROWS){
       finished = true;
       setTimeout(function(){
-        showMsg("La palabra era " + secret);
+        showMsg("¡Se acabaron los intentos! Podés intentar de nuevo");
         resetBtn.classList.add("show");
       }, WORD_LEN*180 + 300);
     }
@@ -445,6 +448,7 @@
     results = [];
     keyStates = {};
     resetBtn.classList.remove("show");
+    nextSalaButton.classList.add("hidden");
     showMsg("");
     buildBoard();
     paintKeyboard();
