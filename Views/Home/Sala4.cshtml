@@ -4,49 +4,167 @@
 
 <div class="sala4-layout sala-theme">
     <div class="sala4-card">
-        <p class="sala4-kicker">Sala 4</p>
-        <h1>El próximo desafío comienza</h1>
-        <p>Acá seguiría el siguiente paso de la sala de escape.</p>
+        <p class="sala4-kicker">Sala 4: La salida final</p>
+        <h1>Desafío del tiempo</h1>
+        <p class="sala4-instruction">Pulsa "Iniciar" y luego "Pausar" exactamente en el tiempo objetivo que se muestra abajo.</p>
+
+        <div class="sala4-content">
+            <div class="timer-area text-center">
+                <div id="timer" class="timer-display">00:00:000</div>
+                <div class="target-box">Objetivo: <span id="targetDisplay" class="target-time">-- s</span></div>
+                <div class="controls" style="margin-top:14px;">
+                    <button id="startPauseBtn" class="next-button">Iniciar</button>
+                    <button id="resetBtn" class="next-button" style="background:linear-gradient(135deg,#94a3b8,#64748b);margin-left:8px">Reiniciar</button>
+                </div>
+                <div class="mt-3">
+                    <span id="message" class="message-text"></span>
+                </div>
+            </div>
+        </div>
+        <!-- El botón de siguiente sala se crea dinámicamente desde JS solo cuando el usuario acierta -->
+        
     </div>
 </div>
 
 <style>
-    .sala4-layout {
-        min-height: 100vh;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        padding: 32px 16px;
-        background: linear-gradient(135deg, #111827 0%, #1f2937 100%);
-        color: #f8fafc;
-        font-family: 'Poppins', sans-serif;
-    }
-
-    .sala4-card {
-        width: min(100%, 600px);
-        background: rgba(17, 24, 39, 0.9);
-        border-radius: 20px;
-        padding: 40px 32px;
-        text-align: center;
-        border: 1px solid rgba(148, 163, 184, 0.2);
-    }
-
-    .sala4-kicker {
-        margin: 0 0 12px;
-        letter-spacing: 0.12em;
-        text-transform: uppercase;
-        color: #fbbf24;
-        font-weight: 700;
-    }
-
-    .sala4-card h1 {
-        margin: 0 0 10px;
-        font-size: clamp(2rem, 4vw, 2.8rem);
-    }
-
-    .sala4-card p {
-        margin: 0;
-        color: #cbd5e1;
-        font-size: 1.05rem;
-    }
+    .sala4-layout { min-height: 100vh; display:flex; align-items:center; justify-content:center; padding:32px 16px; }
+    .sala4-card { width: min(820px, 100%); padding:28px; text-align:center; }
+    .sala4-kicker { text-transform:uppercase; letter-spacing:0.12em; color:#fbbf24; font-weight:700; }
+    .timer-display { font-size:64px; font-weight:800; margin-bottom:6px; color:#fff8eb; letter-spacing:0.02em; transition: opacity 2s ease; }
+    .timer-display.hidden-fade { opacity: 0; }
+    .target-box { margin-top:6px; color:#ffd166; font-weight:800; }
+    .target-time { font-size:1.2rem; margin-left:6px; }
+    .message-text { display:block; min-height:26px; font-weight:700; margin-top:8px; }
 </style>
+
+<script>
+    (function(){
+        const timerEl = document.getElementById('timer');
+        const targetEl = document.getElementById('targetDisplay');
+        const btn = document.getElementById('startPauseBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const messageEl = document.getElementById('message');
+        // note: next-link will be created dynamically when success
+
+        let startTime = 0;
+        let elapsed = 0; // ms
+        let intervalId = null;
+        let running = false;
+
+        // Mostrar cronómetro durante los primeros 10 segundos (10000 ms)
+        const VISIBLE_MS = 10000;
+
+        let targetSecond = 0;
+
+        function pad(n){ return String(n).padStart(2,'0'); }
+
+        function generateTarget(){
+            // objetivo: segundos entre 15 y 30 (inclusive)
+            targetSecond = Math.floor(Math.random() * 16) + 15; // 15-30
+            targetEl.textContent = targetSecond + ' s';
+            console.log('Objetivo (segundos):', targetSecond);
+        }
+
+        function update(){
+            elapsed = Date.now() - startTime;
+            const minutes = Math.floor(elapsed / 60000);
+            const seconds = Math.floor((elapsed % 60000) / 1000);
+            const milliseconds = Math.floor(elapsed % 1000);
+
+            const display = pad(minutes) + ':' + pad(seconds) + ':' + String(milliseconds).padStart(3,'0');
+
+            // Mostrar el cronómetro solo los primeros 10 segundos (luego se desvanece pero sigue contando)
+            if (elapsed <= VISIBLE_MS) {
+                timerEl.classList.remove('hidden-fade');
+                timerEl.style.visibility = 'visible';
+                timerEl.textContent = display;
+            } else {
+                // iniciar transición de desvanecimiento
+                timerEl.textContent = display; // seguir actualizando aunque se desvanezca
+                timerEl.classList.add('hidden-fade');
+                // tras la transición se puede dejar visibility hidden para accesibilidad
+                setTimeout(()=>{ if (elapsed > VISIBLE_MS + 1800) timerEl.style.visibility = 'hidden'; }, 2000);
+            }
+        }
+
+        function start(){
+            startTime = Date.now() - elapsed;
+            intervalId = setInterval(update, 50);
+            running = true;
+            btn.textContent = 'Pausar';
+            messageEl.textContent = '';
+            // mostrar inmediatamente el estado inicial
+            timerEl.style.visibility = 'visible';
+            update();
+        }
+
+        function stopAndCheck(){
+            // calcular tiempo final justo al pausar
+            elapsed = Date.now() - startTime;
+
+            // detener el update loop
+            clearInterval(intervalId);
+            running = false;
+            btn.textContent = 'Iniciar';
+
+            // hacer reaparecer el cronómetro (si se había desvanecido)
+            timerEl.classList.remove('hidden-fade');
+            timerEl.style.visibility = 'visible';
+            const minutes = Math.floor(elapsed / 60000);
+            const seconds = Math.floor((elapsed % 60000) / 1000);
+            const milliseconds = Math.floor(elapsed % 1000);
+            timerEl.textContent = pad(minutes) + ':' + pad(seconds) + ':' + String(milliseconds).padStart(3,'0');
+
+            // Comparamos solo los segundos (target entre 15 y 30)
+            if(seconds === targetSecond){
+                messageEl.style.color = '#6ee7b7';
+                messageEl.textContent = `¡Correcto! Has pausado en ${pad(minutes)}:${pad(seconds)}.`;
+                // crear el botón/forma para ir a la siguiente sala solo ahora
+                if (!document.getElementById('nextLink')){
+                    const form = document.createElement('form');
+                    form.method = 'post';
+                    form.action = '@Url.Action("Sala4part2","Home")';
+                    form.style.marginTop = '16px';
+                    const btnNext = document.createElement('button');
+                    btnNext.id = 'nextLink';
+                    btnNext.className = 'next-button';
+                    btnNext.type = 'submit';
+                    btnNext.textContent = '¡Siguiente sala!';
+                    form.appendChild(btnNext);
+                    document.querySelector('.sala4-card').appendChild(form);
+                }
+            }
+             else {
+                messageEl.style.color = '#ff6b6b';
+                messageEl.textContent = `Incorrecto. El objetivo era ${targetSecond} s. Reiniciando...`;
+                setTimeout(()=>{
+                    reset();
+                }, 1400);
+            }
+            
+        }
+
+        function reset(){
+            clearInterval(intervalId);
+            running = false;
+            elapsed = 0;
+            timerEl.textContent = '00:00:000';
+            timerEl.style.visibility = 'visible';
+            btn.textContent = 'Iniciar';
+            messageEl.textContent = '';
+            // eliminar si existía
+            const existing = document.getElementById('nextLink');
+            if (existing) existing.closest('form')?.remove();
+            generateTarget();
+        }
+
+        btn.addEventListener('click', function(){
+            if(!running){ start(); } else { stopAndCheck(); }
+        });
+
+        resetBtn.addEventListener('click', function(){ reset(); });
+
+        // Inicializar objetivo al cargar
+        generateTarget();
+    })();
+</script>

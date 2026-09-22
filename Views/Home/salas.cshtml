@@ -1,5 +1,5 @@
 @{
-    var salaUnlocked = Context.Session.GetInt32("SalaUnlocked") ?? 4;
+    var salaUnlocked = Context.Session.GetInt32("SalaUnlocked") ?? 5;
 }
 
 <div class="salas-page sala-theme">
@@ -11,7 +11,7 @@
     <div class="salas-grid">
         <a class="salas-card salas-card--active" href="@Url.Action("Introduccion", "Home")">
             <span class="salas-number">Sala 1</span>
-            <span class="salas-name">La cocina vacía</span>
+            <span class="salas-name">La receta vacía</span>
             <span class="salas-status">Entrar</span>
         </a>
 
@@ -19,16 +19,16 @@
         {
             <a class="salas-card salas-card--active" href="@Url.Action("Sala2", "Home")">
                 <span class="salas-number">Sala 2</span>
-                <span class="salas-name">La despensa oculta</span>
+                <span class="salas-name">El huevo faltante</span>
                 <span class="salas-status">Entrar</span>
             </a>
         }
         else
         {
-            <div class="salas-card salas-card--active" href="@Url.Action("Sala2", "Home")">
+            <div class="salas-card salas-card--locked">
                 <span class="salas-number">Sala 2</span>
-                <span class="salas-name">La despensa oculta</span>
-                <span class="salas-status">Entrar</span>
+                <span class="salas-name">El huevo faltante</span>
+                <span class="salas-status">🔒 Bloqueada</span>
             </div>
         }
 
@@ -36,16 +36,16 @@
         {
             <a class="salas-card salas-card--active" href="@Url.Action("Sala3", "Home")">
                 <span class="salas-number">Sala 3</span>
-                <span class="salas-name">La nevera misteriosa</span>
+                <span class="salas-name">Elemento fundamental</span>
                 <span class="salas-status">Entrar</span>
             </a>
         }
         else
         {
-            <div class="salas-card salas-card--active" href="@Url.Action("Sala3", "Home")">
+            <div class="salas-card salas-card--locked">
                 <span class="salas-number">Sala 3</span>
-                <span class="salas-name">La nevera misteriosa</span>
-                <span class="salas-status">Entrar</span>
+                <span class="salas-name">Elemento fundamental</span>
+                <span class="salas-status">🔒 Bloqueada</span>
             </div>
         }
 
@@ -59,10 +59,10 @@
         }
         else
         {
-            <div class="salas-card salas-card--active" href="@Url.Action("Sala4", "Home")">
+            <div class="salas-card salas-card--locked">
                 <span class="salas-number">Sala 4</span>
                 <span class="salas-name">La salida final</span>
-                <span class="salas-status">Entrar</span>
+                <span class="salas-status">🔒 Bloqueada</span>
             </div>
         }
     </div>

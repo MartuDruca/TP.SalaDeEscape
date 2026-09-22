@@ -95,4 +95,4 @@ Z:\2026\prog\TP Sala de escape\obj\Debug\net9.0\scopedcss\Views\Shared\_Layout.c
 Z:\2026\prog\TP Sala de escape\obj\Debug\net9.0\scopedcss\projectbundle\TP Sala de escape.bundle.scp.css
 Z:\2026\prog\TP Sala de escape\obj\Debug\net9.0\compressed\za7wb20b4d-snyzdx02xh.gz
 Z:\2026\prog\TP Sala de escape\obj\Debug\net9.0\compressed\x9g70kteqz-snyzdx02xh.gz
-Z:\2026\prog\TP Sala de escape\obj\Debug\net9.0\compressed\zdnh1qi6pa-qeotrir7pl.gz
+Z:\2026\prog\TP Sala de escape\obj\Debug\net9.0\compressed\zdnh1qi6pa-lqi99jrv1x.gz

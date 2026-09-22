@@ -1,0 +1,140 @@
+@{
+    ViewData["Title"] = "Sala 4 - Memoria";
+}
+
+<div class="sala4-layout sala-theme">
+    <div class="sala4-card">
+        <p class="sala4-kicker">Sala 4: Parte 2</p>
+        <h1>🧠 Juego de Memoria</h1>
+        <p id="nivel" class="sala-subtitle">Nivel 1 - Cuadrícula 3x3</p>
+
+        <div id="mensaje" class="message" style="min-height:36px;margin:14px 0;">Presioná "Comenzar" para jugar.</div>
+
+        <div id="tablero"></div>
+
+        <div style="margin-top:16px;">
+            <button id="botonComenzar" class="next-button">Comenzar</button>
+        </div>
+
+    </div>
+</div>
+
+<style>
+    /* Adaptaciones mínimas para coherencia con el tema */
+    .sala4-layout.sala-theme { min-height:100vh; width:100%; box-sizing:border-box; display:flex; align-items:center; justify-content:center; padding:clamp(12px, 3vw, 32px); }
+    .sala-subtitle { color: #ffd166; font-weight:700; margin-top:20px; text-align:center; }
+    #tablero { display:grid; gap:clamp(5px, 1vw, 10px); width:min( min(72vw, 72vh), 620px); aspect-ratio:1 / 1; margin:0 auto; }
+    .cuadrado { min-width:0; min-height:0; background: rgba(255,255,255,0.06); border: 2px solid rgba(255,224,168,0.12); border-radius:12px; cursor:pointer; transition:filter 0.12s, transform 0.08s; }
+    .cuadrado:hover { transform: translateY(-3px); filter:brightness(1.06); }
+    .next-button { align-self:center; background: linear-gradient(135deg,#ff7b54,#ffd166); box-shadow: 0 10px 22px rgba(255,123,84,0.18); border:none; border-radius:12px; color:#fff; font-weight:700; padding:10px 20px; cursor:pointer; transition:filter 0.12s, transform 0.08s; }
+    .encendido { background: linear-gradient(135deg,#ff7b54,#ffd166); box-shadow: 0 10px 22px rgba(255,123,84,0.18); }
+
+    html, body { margin:0; min-height:100%; }
+    body { min-height:100vh; }
+    .sala4-card { width:100%; min-height:calc(100vh - 64px); box-sizing:border-box; display:flex; flex-direction:column; justify-content:center; align-items:center; padding:clamp(16px, 3vw, 40px); }
+    @@media (max-width:600px) { #tablero { width:min(88vw, 58vh); } .sala4-card { min-height:100vh; } }
+</style>
+
+<script>
+    let nivelActual = 1;
+    let tamañoTablero = 3;
+    let secuencia = [];
+    let posicionJugador = 0;
+    let puedeJugar = false;
+
+    const cantidadesSecuencia = { 1: 4, 2: 6, 3: 8 };
+
+    function crearTablero() {
+        const tablero = document.getElementById("tablero");
+        tablero.innerHTML = "";
+        tablero.style.gridTemplateColumns = `repeat(${tamañoTablero}, 1fr)`;
+        tablero.style.gridTemplateRows = `repeat(${tamañoTablero}, 1fr)`;
+
+        const cantidadCasillas = tamañoTablero * tamañoTablero;
+
+        for (let i = 0; i < cantidadCasillas; i++) {
+            const cuadrado = document.createElement("div");
+            cuadrado.classList.add("cuadrado");
+            cuadrado.dataset.numero = i;
+            cuadrado.addEventListener("click", function () { seleccionarCasilla(i); });
+            tablero.appendChild(cuadrado);
+        }
+    }
+
+    function comenzarJuego() {
+        document.getElementById("botonComenzar").style.display = "none";
+        crearTablero();
+        posicionJugador = 0; puedeJugar = false;
+        document.getElementById("mensaje").textContent = "Mirá la secuencia...";
+        generarSecuencia(); mostrarSecuencia();
+    }
+
+    function generarSecuencia() {
+        secuencia = [];
+        const cantidad = cantidadesSecuencia[nivelActual];
+        const cantidadCasillas = tamañoTablero * tamañoTablero;
+        for (let i = 0; i < cantidad; i++) {
+            let numero;
+            do { numero = Math.floor(Math.random() * cantidadCasillas); } while (secuencia.includes(numero));
+            secuencia.push(numero);
+        }
+    }
+
+    async function mostrarSecuencia() {
+        puedeJugar = false;
+        const cuadrados = document.querySelectorAll(".cuadrado");
+        for (let i = 0; i < secuencia.length; i++) {
+            const numero = secuencia[i];
+            cuadrados[numero].classList.add("encendido");
+            await esperar(500);
+            cuadrados[numero].classList.remove("encendido");
+            await esperar(200);
+        }
+        posicionJugador = 0; puedeJugar = true;
+        document.getElementById("mensaje").textContent = "Ahora repetí la secuencia.";
+    }
+
+    function seleccionarCasilla(numero) {
+        if (!puedeJugar) return;
+        const cuadrados = document.querySelectorAll(".cuadrado");
+        cuadrados[numero].classList.add("encendido");
+        setTimeout(() => cuadrados[numero].classList.remove("encendido"), 250);
+        if (numero === secuencia[posicionJugador]) {
+            posicionJugador++;
+            if (posicionJugador === secuencia.length) {
+                puedeJugar = false; document.getElementById("mensaje").textContent = "¡Correcto! 🎉"; setTimeout(siguienteNivel, 800);
+            }
+        } else { perder(); }
+    }
+
+    function siguienteNivel() {
+        nivelActual++;
+        if (nivelActual > 3) {
+            document.getElementById("mensaje").textContent = "🎉 ¡Ganaste! Completaste todos los niveles.";
+            document.getElementById("nivel").textContent = "Juego completado";
+            const btn = document.getElementById("botonComenzar"); btn.textContent = "Jugar nuevamente"; btn.style.display = "inline-block"; btn.onclick = reiniciarJuego; return;
+        }
+        tamañoTablero = (nivelActual === 2) ? 4 : 5;
+        document.getElementById("nivel").textContent = `Nivel ${nivelActual} - Cuadrícula ${tamañoTablero}x${tamañoTablero}`;
+        document.getElementById("mensaje").textContent = "Preparando la siguiente secuencia...";
+        crearTablero(); setTimeout(()=>{ generarSecuencia(); mostrarSecuencia(); }, 800);
+    }
+
+    function perder() {
+        puedeJugar = false; document.getElementById("mensaje").textContent = "❌ Te equivocaste. ¡Perdiste!";
+        const btn = document.getElementById("botonComenzar"); btn.textContent = "Intentar nuevamente"; btn.style.display = "inline-block"; btn.onclick = reiniciarJuego;
+    }
+
+    function reiniciarJuego() {
+        nivelActual = 1; tamañoTablero = 3; secuencia = []; posicionJugador = 0; puedeJugar = false;
+        document.getElementById("nivel").textContent = "Nivel 1 - Cuadrícula 3x3";
+        document.getElementById("mensaje").textContent = 'Presioná "Comenzar" para jugar.';
+        const btn = document.getElementById("botonComenzar"); btn.textContent = "Comenzar"; btn.onclick = comenzarJuego; btn.style.display = "inline-block"; crearTablero();
+    }
+
+    function esperar(ms) { return new Promise(resolve => setTimeout(resolve, ms)); }
+
+    // Init
+    crearTablero();
+    document.getElementById('botonComenzar').onclick = comenzarJuego;
+</script>

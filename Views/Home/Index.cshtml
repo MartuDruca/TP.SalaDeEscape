@@ -4,7 +4,10 @@
 
         <form class="index-form" action="@Url.Action("Registro", "Home")" method="post">
             <input class="index-input" type="text" id="nombreJugador" name="nombre" placeholder="Ingresá tu nombre" required />
-            <button class="index-button" type="submit">Iniciar juego</button>
+            <button class="index-button" type="submit" onclick="if(typeof startGlobalTimer === 'function'){ try { startGlobalTimer(30); } catch(e){} }">Iniciar juego</button>
+        </form>
+        <form class="index-form" action="@Url.Action("Integrantes", "Home")" method="post">
+            <button class="index-button" type="submit">Ver integrantes</button>
         </form>
     </div>
 </div>

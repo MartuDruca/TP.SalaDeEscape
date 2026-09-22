@@ -24,6 +24,10 @@ build_property.EnableCodeStyleSeverity =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxJbmRleC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
+[Z:/2026/prog/TP Sala de escape/Views/Home/Integrantes.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxJbnRlZ3JhbnRlcy5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
 [Z:/2026/prog/TP Sala de escape/Views/Home/Introduccion.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxJbnRyb2R1Y2Npb24uY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
@@ -52,8 +56,16 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxTYWxhMy5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
+[Z:/2026/prog/TP Sala de escape/Views/Home/sala3part2.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxzYWxhM3BhcnQyLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
 [Z:/2026/prog/TP Sala de escape/Views/Home/Sala4.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxTYWxhNC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[Z:/2026/prog/TP Sala de escape/Views/Home/Sala4part2.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxTYWxhNHBhcnQyLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
 [Z:/2026/prog/TP Sala de escape/Views/Home/salas.cshtml]

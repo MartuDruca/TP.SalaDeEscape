@@ -4,10 +4,10 @@
 
 <div class="sala2-layout sala-theme">
     <div class="sala2-card">
-        <p class="sala2-kicker">Sala 2 · El despensa oculta</p>
+        <p class="sala2-kicker">Sala 2: El huevo faltante</p>
         <h1>Pista secreta</h1>
         <p class="sala2-instruction">
-            Observá la imagen y hacé click 
+            Observá la imagen y hacé click en el huevo verdadero, te podés ayudar con las pistas. 
         </p>
 
         <div class="sala2-content">
@@ -32,16 +32,14 @@
                 <img src='/huevos.png' alt="Imagen de la sala 2" />
                 <div class="grid-overlay" aria-hidden="true"></div>
                 <div id="eggReveal" class="egg-reveal hidden" aria-live="polite">40</div>
-                <button type="button" id="secretRoomButton" class="secret-room-button" aria-label="Ir a la sala 3">
-                    sala
-                </button>
+                <a id="secretRoomButton" class="secret-room-button" asp-controller="Home" asp-action="ResultadoSala2" aria-label="Ir a la sala 3">sala</a>
             </div>
 
             
             <aside class="rules-box" aria-labelledby="rulesTitle">
                 <h3 id="rulesTitle">reglas del juego</h3>
                 <ul>
-                    <li>Regla 1: Tenés 5 intentos para encontrar el huevo verdadero siguiendo las pistas dadas y pasar al siguiente desafío</li>
+                    <li>Regla: Tenés 3 intentos para encontrar el huevo verdadero siguiendo las pistas dadas y pasar al siguiente desafío</li>
                     
                 </ul>
             </aside>
@@ -50,6 +48,26 @@
         <p id="message" class="message">Sigue buscando…</p>
         <div id="lives" class="lives">Vidas: <span id="livesCount">5</span></div>
         <a id="nextButton" class="next-button hidden" asp-controller="Home" asp-action="CompletarSala2">Siguiente desafío</a>
+        
+        <!-- Mini-juego de color (hidden por defecto) -->
+        <div id="colorMiniGame" class="hidden" aria-hidden="true">
+            <div class="color-mini-overlay" id="colorMiniOverlay" style="display:none">
+                <div class="color-mini-box" role="dialog" aria-modal="true" aria-labelledby="colorMiniTitle">
+                    <h3 id="colorMiniTitle">Juego de recuperación - Replica el color</h3>
+                    <p>Se generó un color objetivo. Haz click en la paleta para seleccionar el color que creas que coincide. Si la similitud es >= 70% obtendrás 3 vidas.</p>
+                    <div class="color-target" id="colorTarget" title="Color objetivo"></div>
+                    <canvas id="colorPalette" class="color-palette" width="560" height="240" role="img" aria-label="Paleta de colores"></canvas>
+                    <div style="display:flex;gap:12px;align-items:center;justify-content:center;margin-top:8px;">
+                        <div id="colorPreview" class="color-preview" title="Color seleccionado" style="width:48px;height:48px;border-radius:8px;border:2px solid rgba(255,255,255,0.06);background:transparent"></div>
+                        <div id="colorFeedback" style="min-height:20px;color:#ffdede;font-weight:700"></div>
+                    </div>
+                    <div class="color-mini-controls">
+                        <button id="colorSelect" class="color-mini-btn" disabled>Seleccionar</button>
+                        <button id="colorGiveUp" class="color-mini-btn">Cancelar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -330,6 +348,7 @@
 
     .secret-room-button {
         margin-bottom: 13.5%;
+        padding-top: 3%;
         margin-right: 10%;
         position: absolute;
         left: 37%;
@@ -344,16 +363,83 @@
         text-transform: uppercase;
         box-shadow: 0 8px 20px rgba(34, 197, 94, 0.35);
         cursor: pointer;
-        opacity: 0;
+        opacity: 0%;
     }
 
     .secret-room-button:hover {
         filter: brightness(1.08);
     }
 
-    .secret-room-button.hidden {
-        display: none;
+    .incorrect-flash {
+        animation: incorrectFlash 360ms ease;
     }
+
+    @@keyframes incorrectFlash {
+        0% { box-shadow: 0 0 0 0 rgba(239,68,68,0); transform: none; }
+        30% { box-shadow: 0 0 0 8px rgba(239,68,68,0.85) inset; transform: translateY(-2px); }
+        100% { box-shadow: 0 0 0 0 rgba(239,68,68,0); transform: none; }
+    }
+
+    /* Mini-juego de color */
+    .color-mini-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(2,6,23,0.7);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 2000;
+    }
+
+    .color-mini-box {
+        background: #0b1220;
+        color: #fff;
+        border-radius: 12px;
+        padding: 18px;
+        width: min(92%, 720px);
+        box-shadow: 0 12px 40px rgba(2,6,23,0.8);
+        text-align: center;
+    }
+
+    .color-target {
+        width: 120px;
+        height: 120px;
+        border-radius: 8px;
+        margin: 8px auto 12px auto;
+        border: 3px solid rgba(255,255,255,0.06);
+    }
+
+    .color-palette {
+        display: block;
+        margin: 8px auto 12px auto;
+        width: 100%;
+        max-width: 560px;
+        height: 240px;
+        border-radius: 8px;
+        cursor: crosshair;
+        border: 1px solid rgba(255,255,255,0.06);
+    }
+
+    .color-mini-controls {
+        display:flex;
+        gap:12px;
+        justify-content:center;
+        margin-top:12px;
+    }
+
+    .color-mini-btn {
+        padding:8px 14px;
+        border-radius:8px;
+        background:linear-gradient(135deg,#60a5fa,#3b82f6);
+        color:#07203a;
+        font-weight:700;
+        border:none;
+        cursor:pointer;
+    }
+
+    .color-preview { box-shadow: 0 6px 18px rgba(2,6,23,0.6); }
+    .color-mini-btn[disabled] { opacity: 0.5; cursor: not-allowed; }
+
 </style>
 
 <script>
@@ -398,72 +484,29 @@
             }
         }
 
-        // Build list of candidate cell indices excluding the target
-        const candidates = [];
-        for (let r = 0; r < rows; r++) {
-            for (let c = 0; c < cols; c++) {
-                const idx = r * cols + c;
-                if (idx !== targetIndex) candidates.push(idx);
-            }
-        }
-
-        shuffle(candidates);
-
-        // Pick one special egg that gives a life
-        const specialIndex = candidates.splice(Math.floor(Math.random() * candidates.length), 1)[0];
-
-        // Pick a random number of incorrect eggs (1..5)
-        const incorrectCount = Math.min(5, Math.max(1, Math.floor(Math.random() * 5) + 1));
-        shuffle(candidates);
-        const incorrectSet = new Set(candidates.slice(0, incorrectCount));
-
-        const clickedIncorrect = new Set();
-        let specialUsed = false;
-
-        let lives = 5;
+        // Juego simplificado: 3 vidas, cualquier click dentro de la imagen que no sea la celda correcta resta 1 vida
+        let lives = 3;
         let gameOver = false;
-        let penaltyActive = false;
-        let penaltyRemaining = 0;
-        let penaltyInterval = null;
 
         function updateLives() {
-            livesCountEl.textContent = lives;
+            if (livesCountEl) livesCountEl.textContent = String(lives);
         }
+
+        // Exponer función para que el mini-juego pueda reasignar vidas
+        window.sala2_setLives = function (n) {
+            lives = Number(n) || 0;
+            updateLives();
+            gameOver = false;
+            if (message) message.textContent = `Vidas: ${lives}`;
+        };
 
         updateLives();
 
-        function startPenalty() {
-            penaltyActive = true;
-            penaltyRemaining = 15;
-            let timer = document.getElementById('penaltyTimer');
-            if (!timer) {
-                timer = document.createElement('span');
-                timer.id = 'penaltyTimer';
-                timer.className = 'penalty-timer';
-                livesEl.appendChild(timer);
-            }
-            timer.textContent = `Penalización: ${penaltyRemaining}s`;
-
-            penaltyInterval = setInterval(() => {
-                penaltyRemaining -= 1;
-                if (penaltyRemaining <= 0) {
-                    clearInterval(penaltyInterval);
-                    penaltyInterval = null;
-                    penaltyActive = false;
-                    const t = document.getElementById('penaltyTimer');
-                    t && t.remove();
-                    message.textContent = 'Ya podés seguir buscando.';
-                } else {
-                    const t = document.getElementById('penaltyTimer');
-                    if (t) t.textContent = `Penalización: ${penaltyRemaining}s`;
-                }
-            }, 1000);
-        }
-
         puzzle.addEventListener("click", function (event) {
             if (gameOver) return;
-            if (penaltyActive) {
-                message.textContent = `Penalizado: espera ${penaltyRemaining}s`;
+
+            // si se hizo click sobre el enlace del botón secreto, no penalizar (dejar que navegue)
+            if (event.target && event.target.closest && event.target.closest('#secretRoomButton')) {
                 return;
             }
 
@@ -482,40 +525,24 @@
                 return;
             }
 
-            // Special life egg
-            if (idx === specialIndex && !specialUsed) {
-                specialUsed = true;
-                lives += 1;
-                updateLives();
-                message.textContent = "Encontraste un huevo especial: +1 vida";
-                message.classList.remove("success");
-                return;
-            }
-
-            // Incorrect egg
-            if (incorrectSet.has(idx)) {
-                if (clickedIncorrect.has(idx)) {
-                    message.textContent = "Ese huevo ya lo probaste, no sirve.";
-                    message.classList.remove("success");
-                    return;
-                }
-
-                clickedIncorrect.add(idx);
-                lives -= 1;
-                updateLives();
-                message.textContent = "Huevos incorrecto. Penalización de 15s.";
-                message.classList.remove("success");
-
+            // cualquier otro click resta una vida
+            lives -= 1;
+            updateLives();
                 if (lives <= 0) {
+                    // lanzar mini-juego de color para recuperar vidas
                     gameOver = true;
-                    message.textContent = "Te quedaste sin vidas. Fin del juego.";
                     nextButton.classList.add("hidden");
+                    startColorMiniGame && startColorMiniGame();
                     return;
                 }
 
-                startPenalty();
-                return;
-
+            message.textContent = `Incorrecto. Te quedan ${lives} vidas.`;
+            message.classList.remove("success");
+            // feedback visual breve: borde/flash rojo
+            if (puzzle) {
+                puzzle.classList.add('incorrect-flash');
+                setTimeout(() => puzzle.classList.remove('incorrect-flash'), 360);
+            }
         });
 
         puzzle.addEventListener("keydown", function (event) {
@@ -568,16 +595,159 @@
         });
     })();
 
-    // Nueva lógica para el botón de sala secreta
-    (function () {
-        const secretButton = document.getElementById('secretRoomButton');
+</script>
 
-        if (secretButton) {
-            secretButton.addEventListener('click', function (event) {
-                event.preventDefault();
-                event.stopPropagation();
-                window.location.href = '@Url.Action("ResultadoSala2", "Home")';
-            });
+<script>
+    // Mini-juego: paleta de color y comparación por similitud (>=70%)
+    (function () {
+        const overlay = document.getElementById('colorMiniOverlay');
+        const wrapper = document.getElementById('colorMiniGame');
+        const targetEl = document.getElementById('colorTarget');
+        const canvas = document.getElementById('colorPalette');
+        const feedback = document.getElementById('colorFeedback');
+        const giveUp = document.getElementById('colorGiveUp');
+        let ctx = null;
+        let targetColor = { r: 0, g: 0, b: 0 };
+
+        function randColor() {
+            return {
+                r: Math.floor(Math.random() * 256),
+                g: Math.floor(Math.random() * 256),
+                b: Math.floor(Math.random() * 256)
+            };
         }
+
+        function rgbToCss(c) { return `rgb(${c.r}, ${c.g}, ${c.b})`; }
+
+        function drawPalette() {
+            if (!canvas) return;
+            ctx = canvas.getContext('2d');
+            const w = canvas.width;
+            const h = canvas.height;
+
+            // horizontal hue gradient
+            const hueGrad = ctx.createLinearGradient(0, 0, w, 0);
+            hueGrad.addColorStop(0, 'red');
+            hueGrad.addColorStop(0.16, 'yellow');
+            hueGrad.addColorStop(0.33, 'lime');
+            hueGrad.addColorStop(0.5, 'cyan');
+            hueGrad.addColorStop(0.66, 'blue');
+            hueGrad.addColorStop(0.83, 'magenta');
+            hueGrad.addColorStop(1, 'red');
+            ctx.fillStyle = hueGrad;
+            ctx.fillRect(0, 0, w, h);
+
+            // vertical white overlay (saturation)
+            const whiteGrad = ctx.createLinearGradient(0, 0, 0, h);
+            whiteGrad.addColorStop(0, 'rgba(255,255,255,1)');
+            whiteGrad.addColorStop(1, 'rgba(255,255,255,0)');
+            ctx.fillStyle = whiteGrad;
+            ctx.fillRect(0, 0, w, h);
+
+            // vertical black overlay (value)
+            const blackGrad = ctx.createLinearGradient(0, 0, 0, h);
+            blackGrad.addColorStop(0, 'rgba(0,0,0,0)');
+            blackGrad.addColorStop(1, 'rgba(0,0,0,1)');
+            ctx.fillStyle = blackGrad;
+            ctx.fillRect(0, 0, w, h);
+        }
+
+        function pickColorAt(ev) {
+            if (!ctx) return null;
+            const rect = canvas.getBoundingClientRect();
+            const x = Math.floor((ev.clientX - rect.left) * (canvas.width / rect.width));
+            const y = Math.floor((ev.clientY - rect.top) * (canvas.height / rect.height));
+            const data = ctx.getImageData(x, y, 1, 1).data;
+            return { r: data[0], g: data[1], b: data[2] };
+        }
+
+        function colorDistance(a, b) {
+            const dr = a.r - b.r;
+            const dg = a.g - b.g;
+            const db = a.b - b.b;
+            return Math.sqrt(dr*dr + dg*dg + db*db);
+        }
+
+        function similarityPercent(a, b) {
+            const maxDist = Math.sqrt(3 * 255 * 255);
+            const dist = colorDistance(a, b);
+            return Math.max(0, 1 - dist / maxDist);
+        }
+
+        function showOverlay(show) {
+            if (!overlay || !wrapper) return;
+            overlay.style.display = show ? 'flex' : 'none';
+            wrapper.classList.toggle('hidden', !show);
+            wrapper.setAttribute('aria-hidden', show ? 'false' : 'true');
+        }
+
+        function startColorMiniGame() {
+            if (!overlay) return;
+            // preparar palette y target
+            targetColor = randColor();
+            if (targetEl) targetEl.style.background = rgbToCss(targetColor);
+            drawPalette();
+            feedback.textContent = '';
+            showOverlay(true);
+            // bloquear interacciones con la imagen
+        }
+
+        function endColorMiniGame(success) {
+            showOverlay(false);
+            if (success) {
+                // dar 3 vidas via la API expuesta
+                if (window.sala2_setLives) {
+                    window.sala2_setLives(3);
+                }
+                if (message) message.textContent = 'Has conseguido 3 vidas. ¡A jugar!';
+                gameOver = false;
+            } else {
+                // si el usuario cancela, dejar en gameOver (puede reiniciar desde el juego)
+                if (message) message.textContent = 'Mini-juego cancelado. Vidas: 0.';
+            }
+        }
+
+        // interacción: click en paleta -> mostrar preview y activar 'Seleccionar'
+        let pickedColor = null;
+        const previewEl = document.getElementById('colorPreview');
+        const selectBtn = document.getElementById('colorSelect');
+
+        canvas && canvas.addEventListener && canvas.addEventListener('click', function (ev) {
+            const picked = pickColorAt(ev);
+            if (!picked) return;
+            pickedColor = picked;
+            previewEl && (previewEl.style.background = rgbToCss(pickedColor));
+            feedback.textContent = `Color seleccionado: ${pickedColor.r}, ${pickedColor.g}, ${pickedColor.b}. Presiona Seleccionar.`;
+            selectBtn && (selectBtn.disabled = false);
+        });
+
+        // confirmar selección
+        selectBtn && selectBtn.addEventListener && selectBtn.addEventListener('click', function () {
+            if (!pickedColor) return;
+            const sim = similarityPercent(pickedColor, targetColor);
+            const pct = Math.round(sim * 100);
+            if (sim >= 0.7) {
+                feedback.style.color = '#b7f5d6';
+                feedback.textContent = `¡Correcto! Similitud ${pct}%. Recuperaste 3 vidas.`;
+                endColorMiniGame(true);
+            } else {
+                feedback.style.color = '#ffdede';
+                feedback.textContent = `Similitud ${pct}%. Menos del 70% — nuevo color.`;
+                // nuevo objetivo
+                targetColor = randColor();
+                targetEl && (targetEl.style.background = rgbToCss(targetColor));
+                // reset selección
+                pickedColor = null;
+                previewEl && (previewEl.style.background = 'transparent');
+                selectBtn && (selectBtn.disabled = true);
+            }
+        });
+
+        giveUp && giveUp.addEventListener && giveUp.addEventListener('click', function () {
+            endColorMiniGame(false);
+        });
+
+        // Exponer la función para que la IIFE principal la invoque
+        window.startColorMiniGame = startColorMiniGame;
     })();
 </script>

@@ -1,0 +1,894 @@
+@{
+    ViewData["Title"] = "Sala 3 - Parte 2";
+}
+
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+    <meta charset="utf-8" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Sala 3: Parte 2</title>
+
+
+    <style>
+
+        html, body {
+            margin: 0;
+            min-height: 100%;
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            background-image: linear-gradient(rgba(54, 26, 12, 0.45), rgba(28, 11, 7, 0.7)), url('/fondo.png');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            color: #fff8eb;
+        }
+
+        body {
+            padding: 0;
+            text-align: center;
+        }
+
+        .sala3-page {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem 1rem;
+        }
+
+        .sala3-card {
+            width: min(900px, 92%);
+            background: rgba(58, 31, 20, 0.82);
+            border: 2px solid rgba(255, 220, 155, 0.45);
+            border-radius: 28px;
+            box-shadow: 0 20px 40px rgba(23, 13, 8, 0.35), 0 0 22px rgba(255, 170, 95, 0.18);
+            padding: 2.2rem 2rem;
+        }
+
+        h1 {
+            margin: 0 0 1rem;
+            font-size: clamp(2rem, 3vw, 3rem);
+            font-weight: 800;
+            letter-spacing: 0.04em;
+            color: #fff7e6;
+            text-shadow: 0 3px 10px rgba(0, 0, 0, 0.35);
+        }
+
+        h2 {
+            margin: 1rem 0 0.5rem;
+            color: #ffd166;
+            letter-spacing: 0.04em;
+        }
+
+        .explicacion {
+            font-size: 1.08rem;
+            line-height: 1.8;
+            margin-bottom: 1.6rem;
+            color: #fbe6c4;
+        }
+
+        .explicacion p {
+            margin: 0.8rem 0;
+        }
+
+        #nivel {
+            font-size: 1.3rem;
+            font-weight: 800;
+            margin-bottom: 0.8rem;
+            color: #ffd166;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+
+        #instruccion {
+            font-size: 1.05rem;
+            margin-bottom: 1.3rem;
+            color: #fff8eb;
+            font-weight: 600;
+        }
+
+        .afirmaciones {
+            display: flex;
+            flex-direction: column;
+            gap: 0.9rem;
+            text-align: left;
+            max-height: 355px;
+            overflow-y: auto;
+            padding-right: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .afirmacion {
+            background: rgba(255, 248, 235, 0.94);
+            border: 2px solid rgba(255, 214, 133, 0.8);
+            border-radius: 14px;
+            padding: 1rem 1rem;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            color: #3d2418;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+            box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.04);
+        }
+
+        .afirmacion:hover {
+            transform: translateY(-2px);
+            border-color: #ffb703;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08);
+        }
+
+        .afirmacion.seleccionada {
+            background: linear-gradient(135deg, rgba(255, 123, 84, 0.18), rgba(255, 209, 102, 0.18));
+            border-color: #ff7b54;
+            box-shadow: 0 0 0 3px rgba(255, 183, 3, 0.2);
+        }
+
+        .afirmacion input {
+            margin-right: 0.75rem;
+            transform: scale(1.15);
+            accent-color: #ff7b54;
+        }
+
+        .ninguna {
+            margin-top: 1rem;
+            background: rgba(255, 241, 236, 0.94);
+            border-color: rgba(255, 123, 84, 0.75);
+            color: #4a2b1c;
+        }
+
+        .ninguna.seleccionada {
+            background: rgba(255, 209, 102, 0.18);
+            border-color: #ff7b54;
+        }
+
+        button,
+        .boton-siguiente {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 1.4rem;
+            border: none;
+            border-radius: 16px;
+            padding: 1rem 1.7rem;
+            font-size: 1rem;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            text-decoration: none;
+            color: #fff;
+            background: linear-gradient(135deg, #ff7b54, #ffd166, #7bdff2);
+            cursor: pointer;
+            box-shadow: 0 12px 22px rgba(255, 123, 84, 0.35), 0 0 18px rgba(123, 223, 242, 0.25);
+            transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+        }
+
+        button:hover,
+        .boton-siguiente:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 16px 28px rgba(255, 123, 84, 0.42), 0 0 18px rgba(123, 223, 242, 0.35);
+            filter: brightness(1.06);
+        }
+
+        #mensaje {
+            margin-top: 1.1rem;
+            font-size: 1.05rem;
+            min-height: 2rem;
+            font-weight: 700;
+        }
+
+        .correcto {
+            color: #7ef29a;
+            font-weight: 800;
+        }
+
+        .incorrecto {
+            color: #ffb4b4;
+            font-weight: 800;
+        }
+
+        #juego,
+        #ganaste {
+            display: none;
+        }
+
+        #ganaste.show {
+            display: block;
+        }
+
+        @@media (max-height: 700px) {
+            .afirmaciones {
+                max-height: 220px;
+            }
+
+            .sala3-card {
+                padding: 1.5rem 1rem;
+            }
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+    <div class="sala3-page">
+        <div class="sala3-card">
+
+            <div id="introduccion">
+
+                <h1>🧠 Memoria de la receta</h1>
+
+
+                <div class="explicacion">
+
+                    <p>
+                        En este desafío vas a poner a prueba tu memoria.
+                    </p>
+
+                    <p>
+                        Vas a encontrar distintas afirmaciones relacionadas
+                        con la receta que viste anteriormente.
+                    </p>
+
+                    <p>
+                        Tenés que seleccionar
+                        <strong>solamente las afirmaciones que aparecen en la receta.</strong>
+                    </p>
+
+                    <p>
+                        Puede haber más de una afirmación correcta.
+                        También puede ocurrir que
+                        <strong>ninguna sea correcta.</strong>
+                    </p>
+
+                    <p>
+                        El desafío tiene tres niveles y cada vez habrá
+                        más afirmaciones.
+                    </p>
+
+                    <p>
+                        <strong>Prestá atención y recordá todos los detalles.</strong>
+                    </p>
+
+                </div>
+
+
+                <button onclick="comenzarJuego()">
+                    Comenzar desafío
+                </button>
+
+            </div>
+
+
+
+            <div id="juego">
+
+
+                <div id="nivel">
+                    Nivel 1
+                </div>
+
+
+                <div id="instruccion">
+
+                    Seleccioná todas las afirmaciones correctas.
+
+                </div>
+
+
+                <div id="afirmaciones" class="afirmaciones">
+                </div>
+
+
+
+                <div id="opcionNinguna"
+                     class="afirmacion ninguna"
+                     onclick="seleccionarNinguna()">
+
+                    <input type="checkbox" id="ningunaCheckbox">
+
+                    Ninguna es correcta
+
+                </div>
+
+
+                <button id="botonEnviar" onclick="comprobarRespuesta()">
+
+                    Enviar respuestas
+
+                </button>
+
+
+                <div id="mensaje"></div>
+
+
+            </div>
+
+
+
+            <div id="ganaste">
+
+                <h1>🎉 ¡Desafío superado!</h1>
+
+
+                <p class="explicacion">
+
+                    Recordaste correctamente la información de la receta
+                    y completaste los tres niveles.
+
+                </p>
+
+
+                <h2>🔓 ¡Podés continuar con la sala!</h2>
+
+                <a href="/Home/Sala4" class="boton-siguiente">Ir a la siguiente sala</a>
+
+            </div>
+
+        </div>
+    </div>
+
+
+
+    <script>
+
+
+        let nivelActual = 0;
+
+        let puedeResponder = true;
+
+
+
+        const niveles = [
+
+
+
+            [
+
+                {
+                    texto: "La receta utiliza 2 huevos.",
+                    correcta: true
+                },
+
+                {
+                    texto: "La receta lleva 300 g de azúcar.",
+                    correcta: false
+                },
+
+                {
+                    texto: "La receta utiliza 200 g de harina.",
+                    correcta: true
+                }
+
+            ],
+
+
+
+
+            [
+
+                {
+                    texto: "La receta utiliza 3 huevos.",
+                    correcta: false
+                },
+
+                {
+                    texto: "El horno debe estar a 150 °C.",
+                    correcta: false
+                },
+
+                {
+                    texto: "La receta lleva 250 g de harina.",
+                    correcta: false
+                },
+
+                {
+                    texto: "La preparación utiliza 2 cucharaditas de sal.",
+                    correcta: false
+                },
+
+                {
+                    texto: "Los bizcochitos deben cocinarse durante 2 minutos.",
+                    correcta: false
+                }
+
+            ],
+
+
+
+            [
+
+                {
+                    texto: "La receta lleva 100 g de azúcar.",
+                    correcta: true
+                },
+
+                {
+                    texto: "La preparación comienza batiendo los huevos con el azúcar.",
+                    correcta: true
+                },
+
+                {
+                    texto: "Después se agrega la harina y la sal.",
+                    correcta: true
+                },
+
+                {
+                    texto: "La masa debe quedar homogénea.",
+                    correcta: true
+                },
+
+                {
+                    texto: "Los bizcochitos se cocinan durante 48 segundos.",
+                    correcta: true
+                },
+
+                {
+                    texto: "La receta indica utilizar 1 litro de leche.",
+                    correcta: false
+                },
+
+                {
+                    texto: "Los bollitos se colocan directamente sobre la mesa.",
+                    correcta: false
+                },
+
+                {
+                    texto: "El horno debe estar a 220 °C.",
+                    correcta: false
+                },
+
+                {
+                    texto: "La receta indica agregar 50 g de manteca.",
+                    correcta: false
+                },
+
+                {
+                    texto: "Al terminar, hay que comer los bizcochitos inmediatamente sin dejarlos enfriar.",
+                    correcta: false
+                }
+
+            ]
+
+        ];
+
+
+
+        function comenzarJuego() {
+
+            document.getElementById("introduccion").style.display = "none";
+
+            document.getElementById("juego").style.display = "block";
+
+            nivelActual = 0;
+
+            // iniciar el temporizador global por 30 minutos
+            if (typeof window.startGlobalTimer === 'function') {
+                try { window.startGlobalTimer(30); } catch (e) { /* ignore */ }
+            }
+
+            mostrarNivel();
+
+        }
+
+
+
+        function mostrarNivel() {
+
+
+            puedeResponder = true;
+
+
+            const lista = niveles[nivelActual];
+
+
+            document.getElementById("nivel").textContent =
+                "Nivel " +
+                (nivelActual + 1) +
+                " - " +
+                lista.length +
+                " afirmaciones";
+
+
+            document.getElementById("mensaje").textContent = "";
+
+
+            document.getElementById("ningunaCheckbox").checked = false;
+
+
+            document.getElementById("opcionNinguna")
+                .classList.remove("seleccionada");
+
+
+            const contenedor =
+                document.getElementById("afirmaciones");
+
+
+            contenedor.innerHTML = "";
+
+
+
+            lista.forEach(function (afirmacion, indice) {
+
+
+                const elemento =
+                    document.createElement("div");
+
+
+                elemento.classList.add("afirmacion");
+
+
+                elemento.innerHTML = `
+
+                    <input
+                        type="checkbox"
+                        id="respuesta${indice}"
+                    >
+
+                    ${afirmacion.texto}
+
+                `;
+
+
+
+                elemento.onclick = function () {
+
+                    seleccionarAfirmacion(
+                        indice,
+                        elemento
+                    );
+
+                };
+
+
+
+                contenedor.appendChild(elemento);
+
+            });
+
+
+            document.getElementById("botonEnviar")
+                .style.display = "inline-block";
+
+
+            document.getElementById("botonEnviar")
+                .textContent = "Enviar respuestas";
+
+        }
+
+
+
+
+        function seleccionarAfirmacion(indice, elemento) {
+
+
+            if (!puedeResponder) {
+
+                return;
+
+            }
+
+
+            const checkbox =
+                document.getElementById(
+                    "respuesta" + indice
+                );
+
+
+            checkbox.checked = !checkbox.checked;
+
+
+
+            if (checkbox.checked) {
+
+                elemento.classList.add("seleccionada");
+
+            }
+
+            else {
+
+                elemento.classList.remove("seleccionada");
+
+            }
+
+
+
+            if (checkbox.checked) {
+
+                document.getElementById(
+                    "ningunaCheckbox"
+                ).checked = false;
+
+
+                document.getElementById(
+                    "opcionNinguna"
+                ).classList.remove("seleccionada");
+
+            }
+
+        }
+
+
+
+
+
+        function seleccionarNinguna() {
+
+
+            if (!puedeResponder) {
+
+                return;
+
+            }
+
+
+            const checkbox =
+                document.getElementById(
+                    "ningunaCheckbox"
+                );
+
+
+            checkbox.checked = !checkbox.checked;
+
+
+
+            if (checkbox.checked) {
+
+
+                document.getElementById(
+                    "opcionNinguna"
+                ).classList.add("seleccionada");
+
+
+
+
+
+                const checkboxes =
+                    document.querySelectorAll(
+                        "#afirmaciones input"
+                    );
+
+
+                checkboxes.forEach(function (checkbox) {
+
+                    checkbox.checked = false;
+
+                });
+
+
+
+                const elementos =
+                    document.querySelectorAll(
+                        "#afirmaciones .afirmacion"
+                    );
+
+
+                elementos.forEach(function (elemento) {
+
+                    elemento.classList.remove(
+                        "seleccionada"
+                    );
+
+                });
+
+            }
+
+            else {
+
+                document.getElementById(
+                    "opcionNinguna"
+                ).classList.remove(
+                    "seleccionada"
+                );
+
+            }
+
+        }
+
+
+
+        function comprobarRespuesta() {
+
+
+            if (!puedeResponder) {
+
+                return;
+
+            }
+
+
+            const lista =
+                niveles[nivelActual];
+
+
+            let respuestasJugador = [];
+
+
+
+
+            lista.forEach(function (afirmacion, indice) {
+
+
+                const checkbox =
+                    document.getElementById(
+                        "respuesta" + indice
+                    );
+
+
+                if (checkbox.checked) {
+
+                    respuestasJugador.push(indice);
+
+                }
+
+            });
+
+
+
+            const seleccionoNinguna =
+                document.getElementById(
+                    "ningunaCheckbox"
+                ).checked;
+
+
+
+
+            let respuestasCorrectas = [];
+
+
+            lista.forEach(function (afirmacion, indice) {
+
+
+                if (afirmacion.correcta) {
+
+                    respuestasCorrectas.push(indice);
+
+                }
+
+            });
+
+
+
+            let esCorrecto = false;
+
+
+
+
+            if (seleccionoNinguna) {
+
+
+                if (
+                    respuestasCorrectas.length === 0 &&
+                    respuestasJugador.length === 0
+                ) {
+
+                    esCorrecto = true;
+
+                }
+
+            }
+
+
+
+            else {
+
+
+                if (
+                    respuestasJugador.length ===
+                    respuestasCorrectas.length
+                ) {
+
+
+                    esCorrecto =
+                        respuestasJugador.every(
+                            function (numero) {
+
+                                return respuestasCorrectas.includes(
+                                    numero
+                                );
+
+                            }
+                        );
+
+                }
+
+            }
+
+
+
+
+            if (esCorrecto) {
+
+
+                puedeResponder = false;
+
+
+                document.getElementById(
+                    "mensaje"
+                ).innerHTML =
+
+                    '<span class="correcto">' +
+                    '✅ ¡Correcto! Muy bien.' +
+                    '</span>';
+
+
+
+                document.getElementById(
+                    "botonEnviar"
+                ).style.display = "none";
+
+
+
+                setTimeout(function () {
+
+                    siguienteNivel();
+
+                }, 1200);
+
+            }
+
+
+
+            else {
+
+
+                document.getElementById(
+                    "mensaje"
+                ).innerHTML =
+
+                    '<span class="incorrecto">' +
+                    '❌ Hay una respuesta incorrecta. Revisá lo que seleccionaste e intentá nuevamente.' +
+                    '</span>';
+
+            }
+
+        }
+
+
+
+
+        function siguienteNivel() {
+
+
+            nivelActual++;
+
+
+            if (nivelActual >= niveles.length) {
+
+
+                document.getElementById(
+                    "juego"
+                ).style.display = "none";
+
+
+                document.getElementById(
+                    "ganaste"
+                ).style.display = "block";
+
+                // al completar el juego, limpiar el temporizador global
+                if (typeof window.clearGlobalTimer === 'function') {
+                    try { window.clearGlobalTimer(); } catch (e) { /* ignore */ }
+                }
+
+                return;
+
+            }
+
+
+            mostrarNivel();
+
+        }
+
+
+    </script>
+
+
+</body>
+
+</html>

@@ -19,13 +19,128 @@
             height: 100vh;
             overflow: hidden;
         }
+        #global-timer {
+            position: fixed;
+            top: 16px;
+            right: 16px;
+            background: rgba(0,0,0,0.85);
+            color: #fff;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-family: Arial, sans-serif;
+            font-size: 16px;
+            z-index: 999999 !important;
+            display: none;
+            min-width: 88px;
+            text-align: center;
+            pointer-events: none;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.25);
+        }
+        #global-timer.active { display: block !important; }
     </style>
 </head>
 <body>
+    <div id="global-timer" aria-live="polite" title="Tiempo restante">00:00:00</div>
     @RenderBody()
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+
+    <script>
+        (function () {
+            const STORAGE_KEY = 'escapeGameTimer';
+
+            function readTimer() {
+                try {
+                    const raw = localStorage.getItem(STORAGE_KEY);
+                    if (!raw) return null;
+                    const obj = JSON.parse(raw);
+                    if (!obj.endTime) return null;
+                    return obj;
+                } catch (e) {
+                    return null;
+                }
+            }
+
+            function writeTimer(endTime) {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify({ endTime: endTime }));
+            }
+
+            function clearTimerStorage() {
+                localStorage.removeItem(STORAGE_KEY);
+            }
+
+            function formatRemaining(ms) {
+                if (ms < 0) ms = 0;
+                const totalSec = Math.floor(ms / 1000);
+                const hours = Math.floor(totalSec / 3600);
+                const minutes = Math.floor((totalSec % 3600) / 60);
+                const seconds = totalSec % 60;
+                return String(hours).padStart(2,'0') + ':' + String(minutes).padStart(2,'0') + ':' + String(seconds).padStart(2,'0');
+            }
+
+            // ensure there's a single timer element appended to the body
+            let el = document.getElementById('global-timer');
+            if (!el) {
+                el = document.createElement('div');
+                el.id = 'global-timer';
+                el.setAttribute('aria-live','polite');
+                el.title = 'Tiempo restante';
+                el.textContent = '00:00:00';
+                document.body.appendChild(el);
+            } else {
+                // if a view replaced the body content, re-append to body to keep it top-level
+                if (el.parentNode !== document.body) document.body.appendChild(el);
+            }
+
+            let intervalId = null;
+
+            function updateOnce() {
+                const data = readTimer();
+                if (!data) {
+                    el.classList.remove('active');
+                    return;
+                }
+                const remaining = data.endTime - Date.now();
+                if (remaining <= 0) {
+                    el.textContent = '00:00:00';
+                    clearTimerStorage();
+                    el.classList.add('active');
+                } else {
+                    el.textContent = formatRemaining(remaining);
+                    el.classList.add('active');
+                }
+            }
+
+            function startInterval() {
+                if (intervalId) return;
+                intervalId = setInterval(updateOnce, 500);
+            }
+
+            window.startGlobalTimer = function (minutes) {
+                const end = Date.now() + Math.round(minutes * 60 * 1000);
+                writeTimer(end);
+                updateOnce();
+                startInterval();
+            };
+
+            window.clearGlobalTimer = function () {
+                clearTimerStorage();
+                updateOnce();
+                // ensure hidden
+                el.classList.remove('active');
+            };
+
+            // initialize on load
+            updateOnce();
+            startInterval();
+
+            // keep in sync across tabs/windows
+            window.addEventListener('storage', function (e) {
+                if (e.key === STORAGE_KEY) updateOnce();
+            });
+        })();
+    </script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

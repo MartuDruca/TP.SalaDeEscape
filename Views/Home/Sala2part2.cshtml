@@ -1,1 +1,335 @@
-hola
+@{
+    ViewData["Title"] = "Sala 2 · Precalentar horno";
+}
+
+<div class="oven-layout">
+    <div class="oven-card">
+        <p class="oven-kicker">Sala 3: Parte 2</p>
+        <h1>Precalentá el horno</h1>
+        <p class="oven-instruction">
+            Mantené apretado el mouse sobre la perilla y girala hasta llegar exactamente a 180°.
+            Cuando estés seguro, presioná "Confirmar". Si la perilla no está exactamente en 180°, seguís intentando.
+        </p>
+
+        <div class="dial-wrapper">
+            <div class="dial" id="dial" aria-label="Perilla del horno" role="slider" aria-valuemin="0" aria-valuemax="360" aria-valuenow="0" aria-valuetext="0 grados" tabindex="0">
+                <div class="dial-ring"></div>
+                <div class="dial-indicator"></div>
+                <div class="dial-center"></div>
+            </div>
+        </div>
+
+        <div class="dial-readout">
+            <span>Ángulo:</span>
+            <strong id="angleValue">0°</strong>
+        </div>
+
+        <div class="progress-bar" aria-hidden="true">
+            <span id="progressFill"></span>
+        </div>
+
+        <p id="dialMessage" class="dial-message">Mantené presionado el mouse y girá hasta 180°.</p>
+
+        <button id="confirmButton" class="confirm-button" type="button">Confirmar</button>
+        <a id="nextButton" class="next-button hidden" asp-controller="Home" asp-action="Sala3">Continuar</a>
+    </div>
+</div>
+
+<style>
+    body {
+        margin: 0;
+        font-family: 'Segoe UI', sans-serif;
+    }
+
+    .oven-layout {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 32px 16px;
+        background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+        color: #f9fafb;
+    }
+
+    .oven-card {
+        width: min(100%, 680px);
+        background: rgba(15, 23, 42, 0.94);
+        border: 1px solid rgba(148, 163, 184, 0.25);
+        border-radius: 24px;
+        padding: 28px 24px 20px;
+        box-shadow: 0 24px 60px rgba(0,0,0,0.45);
+        text-align: center;
+    }
+
+    .oven-kicker {
+        margin: 0 0 10px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: #fbbf24;
+        font-size: 0.72rem;
+        font-weight: 800;
+    }
+
+    h1 {
+        margin: 0 0 12px;
+        font-size: clamp(2rem, 4vw, 2.8rem);
+    }
+
+    .oven-instruction {
+        color: #d1d5db;
+        line-height: 1.6;
+        margin: 0 auto 24px;
+        max-width: 560px;
+    }
+
+    .dial-wrapper {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin: 18px 0 12px;
+    }
+
+    .dial {
+        position: relative;
+        width: 250px;
+        height: 250px;
+        border-radius: 50%;
+        background: radial-gradient(circle at 50% 34%, #f8fafc 0%, #dbeafe 18%, #94a3b8 28%, #1f2937 100%);
+        border: 10px solid rgba(255,255,255,0.09);
+        box-shadow: inset 0 0 30px rgba(255,255,255,0.12), 0 18px 40px rgba(15, 23, 42, 0.45);
+        cursor: grab;
+        user-select: none;
+        touch-action: none;
+        transition: transform 0.05s linear;
+    }
+
+    .dial:active {
+        cursor: grabbing;
+    }
+
+    .dial-ring {
+        position: absolute;
+        inset: 14px;
+        border-radius: 50%;
+        border: 3px solid rgba(255,255,255,0.18);
+    }
+
+    .dial-indicator {
+        position: absolute;
+        left: 50%;
+        top: 18px;
+        width: 18px;
+        height: 72px;
+        transform: translateX(-50%);
+        border-radius: 12px 12px 20px 20px;
+        background: linear-gradient(180deg, #fbbf24 0%, #f97316 100%);
+        box-shadow: 0 0 16px rgba(251, 191, 36, 0.6);
+    }
+
+    .dial-center {
+        position: absolute;
+        inset: 50% auto auto 50%;
+        width: 34px;
+        height: 34px;
+        transform: translate(-50%, -50%);
+        border-radius: 50%;
+        background: linear-gradient(135deg, #111827, #374151);
+        border: 4px solid rgba(255,255,255,0.18);
+    }
+
+    .dial-readout {
+        margin: 16px 0 8px;
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #fbbf24;
+    }
+
+    .dial-readout strong {
+        color: #fef3c7;
+    }
+
+    .progress-bar {
+        width: min(100%, 360px);
+        height: 18px;
+        background: rgba(255,255,255,0.08);
+        border-radius: 999px;
+        overflow: hidden;
+        margin: 10px auto 14px;
+        border: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .progress-bar span {
+        display: block;
+        width: 0%;
+        height: 100%;
+        background: linear-gradient(90deg, #fbbf24 0%, #f97316 50%, #ef4444 100%);
+        border-radius: inherit;
+        transition: width 0.1s linear;
+    }
+
+    .dial-message {
+        min-height: 24px;
+        color: #dbeafe;
+        font-weight: 600;
+        margin: 0 0 18px;
+    }
+
+    .confirm-button,
+    .next-button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 12px 22px;
+        border-radius: 999px;
+        border: none;
+        cursor: pointer;
+        font-weight: 800;
+        text-decoration: none;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .confirm-button {
+        background: linear-gradient(135deg, #60a5fa 0%, #2563eb 100%);
+        color: #eff6ff;
+        box-shadow: 0 12px 22px rgba(37, 99, 235, 0.35);
+    }
+
+    .confirm-button:hover,
+    .next-button:hover {
+        transform: translateY(-2px);
+    }
+
+    .next-button {
+        background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+        color: #111827;
+        box-shadow: 0 12px 22px rgba(245, 158, 11, 0.45);
+        margin-left: 10px;
+    }
+
+    .hidden {
+        display: none;
+    }
+</style>
+
+<script>
+    (function () {
+        const dial = document.getElementById('dial');
+        const angleValue = document.getElementById('angleValue');
+        const dialMessage = document.getElementById('dialMessage');
+        const progressFill = document.getElementById('progressFill');
+        const confirmButton = document.getElementById('confirmButton');
+        const nextButton = document.getElementById('nextButton');
+
+        const targetAngle = 180;
+        let currentRotation = 0;
+        let isDragging = false;
+        let pointerId = null;
+        let lastPointerAngle = 0;
+
+        function normalizeDegrees(value) {
+            let normalized = value % 360;
+            if (normalized < 0) normalized += 360;
+            return normalized;
+        }
+
+        function getPointerAngle(event) {
+            const rect = dial.getBoundingClientRect();
+            const cx = rect.left + rect.width / 2;
+            const cy = rect.top + rect.height / 2;
+            const radians = Math.atan2(event.clientY - cy, event.clientX - cx);
+            let angle = (radians * 180 / Math.PI) + 90;
+            return normalizeDegrees(angle);
+        }
+
+        function updateDialUI(rotation) {
+            currentRotation = normalizeDegrees(rotation);
+            dial.style.transform = `rotate(${currentRotation}deg)`;
+            dial.setAttribute('aria-valuenow', String(Math.round(currentRotation)));
+            dial.setAttribute('aria-valuetext', `${Math.round(currentRotation)} grados`);
+            angleValue.textContent = `${Math.round(currentRotation)}°`;
+
+            const error = Math.abs(currentRotation - targetAngle);
+            const closeness = Math.max(0, 100 - (error / 180) * 100);
+            progressFill.style.width = `${Math.min(100, Math.max(0, closeness))}%`;
+        }
+
+        function isExact180() {
+            return Math.round(currentRotation) === 180;
+        }
+
+        function handleConfirm() {
+            if (isExact180()) {
+                dialMessage.textContent = '¡Perfecto! La perilla está exactamente en 180°.';
+                nextButton.classList.remove('hidden');
+                confirmButton.disabled = true;
+                confirmButton.style.opacity = '0.5';
+                confirmButton.style.cursor = 'not-allowed';
+                dial.style.boxShadow = '0 0 0 10px rgba(74, 222, 128, 0.15), 0 18px 40px rgba(15, 23, 42, 0.45)';
+            } else {
+                dialMessage.textContent = 'No está en 180° exacto. Sigue intentando.';
+                nextButton.classList.add('hidden');
+            }
+        }
+
+        function onPointerDown(event) {
+            isDragging = true;
+            pointerId = event.pointerId;
+            dial.setPointerCapture(event.pointerId);
+            lastPointerAngle = getPointerAngle(event);
+            dialMessage.textContent = 'Girá la perilla con el mouse. Debe quedar exactamente en 180°.';
+        }
+
+        function onPointerMove(event) {
+            if (!isDragging || event.pointerId !== pointerId) return;
+
+            const pointerAngle = getPointerAngle(event);
+            let delta = pointerAngle - lastPointerAngle;
+
+            // Sensibilidad extrema para hacer difícil llegar a 180 exacto.
+            const sensitiveDelta = delta * 2.8;
+            const nextRotation = currentRotation + sensitiveDelta;
+
+            updateDialUI(nextRotation);
+            lastPointerAngle = pointerAngle;
+
+            if (!nextButton.classList.contains('hidden')) {
+                nextButton.classList.add('hidden');
+                confirmButton.disabled = false;
+                confirmButton.style.opacity = '1';
+                confirmButton.style.cursor = 'pointer';
+            }
+        }
+
+        function onPointerUp() {
+            isDragging = false;
+            pointerId = null;
+            if (!isExact180()) {
+                dialMessage.textContent = 'Sigue intentando; la perilla debe quedar en 180° exacto.';
+            }
+        }
+
+        dial.addEventListener('pointerdown', onPointerDown);
+        dial.addEventListener('pointermove', onPointerMove);
+        dial.addEventListener('pointerup', onPointerUp);
+        dial.addEventListener('pointercancel', onPointerUp);
+
+        confirmButton.addEventListener('click', handleConfirm);
+
+        dial.addEventListener('keydown', function (event) {
+            if (event.key === 'ArrowRight' || event.key === 'ArrowUp') {
+                event.preventDefault();
+                updateDialUI(currentRotation + 5);
+            }
+
+            if (event.key === 'ArrowLeft' || event.key === 'ArrowDown') {
+                event.preventDefault();
+                updateDialUI(currentRotation - 5);
+            }
+
+            if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                handleConfirm();
+            }
+        });
+    })();
+</script>
