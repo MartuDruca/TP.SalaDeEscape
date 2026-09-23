@@ -20,6 +20,10 @@ build_property._RazorSourceGeneratorDebug =
 build_property.EffectiveAnalysisLevelStyle = 9.0
 build_property.EnableCodeStyleSeverity = 
 
+[Z:/2026/prog/TP Sala de escape/Views/Home/Cierre.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxDaWVycmUuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
 [Z:/2026/prog/TP Sala de escape/Views/Home/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxJbmRleC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
@@ -34,6 +38,10 @@ build_metadata.AdditionalFiles.CssScope =
 
 [Z:/2026/prog/TP Sala de escape/Views/Home/Privacy.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxQcml2YWN5LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[Z:/2026/prog/TP Sala de escape/Views/Home/Resultados.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxSZXN1bHRhZG9zLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
 [Z:/2026/prog/TP Sala de escape/Views/Home/Sala1.cshtml]

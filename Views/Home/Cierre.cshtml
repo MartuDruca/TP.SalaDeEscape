@@ -1,0 +1,36 @@
+@{
+    Layout = "_Layout";
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cerrando sesión</title>
+</head>
+<body>
+    <div style="padding:32px;color:#fff;">Cerrando sesión…</div>
+
+    <script>
+        (function(){
+            try {
+                if (typeof window.clearGlobalTimer === 'function') {
+                    window.clearGlobalTimer();
+                }
+            } catch(e) {
+                // ignore
+            }
+
+            try {
+                localStorage.removeItem('escapeGameTimer');
+                localStorage.removeItem('escapeGameTimerStartedAt');
+            } catch(e) { }
+
+            setTimeout(function(){
+                window.location = '@Url.Action("Index","Home")';
+            }, 250);
+        })();
+    </script>
+</body>
+</html>

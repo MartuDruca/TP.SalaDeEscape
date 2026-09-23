@@ -14,11 +14,7 @@ public class HomeController : Controller
     public HomeController(ILogger<HomeController> logger, IConfiguration configuration)
     {
         _logger = logger;
-        // inicializar helper de BD con la cadena de conexión
-        try { BD.Initialize(configuration); } catch { }
     }
-    
-    [HttpPost]
 
     private int ObtenerSalaDesbloqueada()
     {
@@ -27,22 +23,17 @@ public class HomeController : Controller
 
     private void GuardarSalaDesbloqueada(int sala)
     {
-        HttpContext.Session.SetInt32(SalaUnlockedKey, int.MaxValue);
     }
 
     private IActionResult? ValidarSala(int salaRequerida)
     {
-        if (ObtenerSalaDesbloqueada() < salaRequerida)
-        {
-            return RedirectToAction("Salas");
-        }
-
         return null;
     }
 
     public IActionResult Index()
     {
         string nombreUsuario = HttpContext.Session.GetString("usuario");
+
         if (!string.IsNullOrEmpty(nombreUsuario))
         {
             return RedirectToAction("Salas");
@@ -56,6 +47,7 @@ public class HomeController : Controller
         return View();
     }
 
+    [HttpPost]
     public IActionResult Registro(string nombre)
     {
         if (string.IsNullOrWhiteSpace(nombre))
@@ -63,26 +55,21 @@ public class HomeController : Controller
             return RedirectToAction("Index");
         }
 
+        int jugadorId = BD.CrearJugador(nombre);
+
+        int partidaId = BD.CrearPartida(jugadorId);
+
         HttpContext.Session.SetString("usuario", nombre);
 
-        // iniciar y guardar partida en session + DB (si está configurada)
-        HttpContext.Session.SetString("inicioPartida", DateTime.UtcNow.ToString("o"));
+        HttpContext.Session.SetInt32("jugadorId", jugadorId);
+
+        HttpContext.Session.SetInt32("partidaId", partidaId);
+
         HttpContext.Session.SetInt32("salaActual", 1);
 
-        try
-        {
-            int partidaId = BD.CrearPartida(nombre);
-            if (partidaId > 0)
-            {
-                HttpContext.Session.SetInt32("partidaId", partidaId);
-            }
-        }
-        catch (Exception ex)
-        {
-            _logger.LogWarning(ex, "No se pudo crear la partida en la base (revisar cadena de conexión).");
-        }
+        HttpContext.Session.SetInt32("SalaUnlocked", 1);
 
-        return RedirectToAction("Index");
+        return RedirectToAction("Salas");
     }
 
     public IActionResult Salas()
@@ -98,13 +85,17 @@ public class HomeController : Controller
 
     public IActionResult CompletarSala1()
     {
-        GuardarSalaDesbloqueada(2);
-        var pid = HttpContext.Session.GetInt32("partidaId");
-        if (pid.HasValue)
+        HttpContext.Session.SetInt32("salaActual", 2);
+        HttpContext.Session.SetInt32("SalaUnlocked", 2);
+
+        int? partidaId = HttpContext.Session.GetInt32("partidaId");
+        int? jugadorId = HttpContext.Session.GetInt32("jugadorId");
+
+        if (partidaId.HasValue && jugadorId.HasValue)
         {
-            BD.RegistrarSalaCompletada(pid.Value, 1);
-            BD.ActualizarSalaActual(pid.Value, 2);
+            BD.ActualizarSalaActual(partidaId.Value, jugadorId.Value, 2);
         }
+
         return RedirectToAction("Sala2");
     }
 
@@ -112,63 +103,37 @@ public class HomeController : Controller
     {
         return View("Sala2part2");
     }
+    
     public IActionResult CompletarSala2()
     {
-        GuardarSalaDesbloqueada(3);
-        var pid = HttpContext.Session.GetInt32("partidaId");
-        if (pid.HasValue)
+        HttpContext.Session.SetInt32("salaActual", 3);
+        HttpContext.Session.SetInt32("SalaUnlocked", 3);
+
+        int? partidaId = HttpContext.Session.GetInt32("partidaId");
+        int? jugadorId = HttpContext.Session.GetInt32("jugadorId");
+
+        if (partidaId.HasValue && jugadorId.HasValue)
         {
-            BD.RegistrarSalaCompletada(pid.Value, 2);
-            BD.ActualizarSalaActual(pid.Value, 3);
+            BD.ActualizarSalaActual(partidaId.Value, jugadorId.Value, 3);
         }
+
         return RedirectToAction("Sala3");
     }
 
     public IActionResult CompletarSala3()
     {
-        GuardarSalaDesbloqueada(5);
-        var pid = HttpContext.Session.GetInt32("partidaId");
-        if (pid.HasValue)
+        HttpContext.Session.SetInt32("salaActual", 4);
+        HttpContext.Session.SetInt32("SalaUnlocked", 4);
+
+        int? partidaId = HttpContext.Session.GetInt32("partidaId");
+        int? jugadorId = HttpContext.Session.GetInt32("jugadorId");
+
+        if (partidaId.HasValue && jugadorId.HasValue)
         {
-            BD.RegistrarSalaCompletada(pid.Value, 3);
-            BD.ActualizarSalaActual(pid.Value, 4);
-        }
+            BD.ActualizarSalaActual(partidaId.Value, jugadorId.Value, 4);
+         }
+
         return RedirectToAction("Sala4");
-    }
-
-    [HttpPost]
-    public IActionResult ActualizarSala(int sala)
-    {
-        var pid = HttpContext.Session.GetInt32("partidaId");
-        if (pid.HasValue) BD.ActualizarSalaActual(pid.Value, sala);
-        return Ok();
-    }
-
-    [HttpPost]
-    public IActionResult TerminarPartida()
-    {
-        // marcar fin de partida y mostrar resultados
-        int? pid = HttpContext.Session.GetInt32("partidaId");
-        if (!pid.HasValue)
-        {
-            return RedirectToAction("Index");
-        }
-
-        try { BD.FinalizarPartida(pid.Value); } catch { }
-
-        var model = BD.ObtenerResultados(pid.Value);
-        if (model == null)
-        {
-            model = new ResultadoViewModel();
-            model.PartidaId = pid.Value;
-            model.Nombre = HttpContext.Session.GetString("usuario") ?? "---";
-            var inicio = DateTime.Parse(HttpContext.Session.GetString("inicioPartida") ?? DateTime.UtcNow.ToString("o"));
-            model.TiempoTotal = DateTime.UtcNow - inicio;
-            int? s = HttpContext.Session.GetInt32("salaActual");
-            if (s.HasValue) for (int i = 1; i < s.Value; i++) model.SalasCompletadas.Add(i);
-        }
-
-        return View("Resultados", model);
     }
 
     public IActionResult Introduccion(){
@@ -214,6 +179,58 @@ public class HomeController : Controller
         return View("Sala4part2");
     }
 
+    public IActionResult Resultados()
+    {
+        string nombreUsuario = HttpContext.Session.GetString("usuario");
+
+        if (string.IsNullOrWhiteSpace(nombreUsuario))
+        {
+            return RedirectToAction("Index");
+        }
+
+        var model = new ResultadoViewModel
+        {
+            Nombre = nombreUsuario,
+            TiempoTotal = TimeSpan.Zero,
+            SalasCompletadas = new List<int>(),
+            Leaderboard = new List<LeaderboardItem>()
+        };
+
+        int? partidaId = HttpContext.Session.GetInt32("partidaId");
+
+        if (partidaId.HasValue)
+        {
+            var partida = BD.ObtenerPartida(partidaId.Value);
+            if (partida != null)
+            {
+                DateTime inicio = partida.FechaInicio;
+                DateTime fin = partida.FechaFin ?? DateTime.Now;
+                model.TiempoTotal = fin - inicio;
+                model.PartidaId = partida.Id;
+
+                for (int i = 1; i <= partida.SalaActual; i++)
+                {
+                    model.SalasCompletadas.Add(i);
+                }
+            }
+        }
+
+        return View(model);
+    }
+
+    [HttpPost]
+    public IActionResult FinalizarPartida()
+    {
+        int? partidaId = HttpContext.Session.GetInt32("partidaId");
+
+        if (partidaId.HasValue)
+        {
+            BD.FinalizarPartida(partidaId.Value);
+        }
+
+        return RedirectToAction("Resultados");
+    }
+
     public IActionResult Privacy()
     {
         return View();
@@ -221,8 +238,16 @@ public class HomeController : Controller
 
     public IActionResult Cierre()
     {
+        int? partidaId = HttpContext.Session.GetInt32("partidaId");
+
+        if (partidaId.HasValue)
+        {
+            BD.FinalizarPartida(partidaId.Value);
+        }
+
         HttpContext.Session.Clear();
-        return RedirectToAction("Index");
+
+        return View("Cierre");
     }
 
 

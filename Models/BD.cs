@@ -4,167 +4,149 @@ using System.Data.SqlClient;
 using Dapper;
 using Microsoft.Data.SqlClient;
 
+using Microsoft.Data.SqlClient;
+
 public static class BD
 {
-
     private static string _connectionString = @"Server=localhost;Database=SalaDeEscape;Integrated Security=True;TrustServerCertificate=True;";
 
-    public static void CrearPartida(Partida partida)
-    {
-            string query = @"INSERT INTO Partidas (JugadorId, FechaInicio, SalaActual, FechaFin) VALUES (@jugadorId, @inicio, @sala, @fin);";
-            using (SqlConnection conn = new SqlConnection(_connectionString))
-            {
-                conn.Execute(query, new {JugadorId = partida.JugadorId, inicio = partida.FechaInicio, sala = partida.SalaActual, fin = null});
-            }
 
-    }
-
-    private static void CreateJugadorId(string nombre)
+    public static int CrearJugador(string nombre)
     {
-        string query = "INSERT INTO Jugadores (Nombre) VALUES (@nombre)";
+        string query = @"
+            INSERT INTO Jugador (nombre, SalaActual)
+            VALUES (@nombre, 1);
+
+            SELECT SCOPE_IDENTITY();
+        ";
+
         using (SqlConnection conn = new SqlConnection(_connectionString))
         {
+            conn.Open();
+
+            using (SqlCommand cmd = new SqlCommand(query, conn))
+            {
                 cmd.Parameters.AddWithValue("@nombre", nombre);
-                conn.Open();
-                var id = cmd.ExecuteScalar();
-            
+
+                int id = Convert.ToInt32(cmd.ExecuteScalar());
+
+                return id;
+            }
         }
     }
 
-    private static int GetJugadorId(string nombre)
+    public static Partida? ObtenerPartida(int id)
     {
-        using (var cmd = new SqlCommand("SELECT Id FROM Jugadores WHERE Nombre = @nombre", conn))
-        {
-            cmd.Parameters.AddWithValue("@nombre", nombre);
-            var r = cmd.ExecuteScalar();
-            if (r != null) return Convert.ToInt32(r);
-        }
+        string query = @"
+            SELECT Id, FechaInicio, FechaFin, salaActual AS SalaActual, JugadorId
+            FROM Partida
+            WHERE Id = @id
+        ";
 
-    }
-
-    public static void RegistrarSalaCompletada(int partidaId, int sala)
-    {
-        if (!HasConnection) return;
-        try
+        using (SqlConnection conn = new SqlConnection(_connectionString))
         {
-            using (var conn = new SqlConnection(_connectionString))
+            conn.Open();
+
+            using (SqlCommand cmd = new SqlCommand(query, conn))
             {
-                conn.Open();
-                var sql = "INSERT INTO PartidaSalas (PartidaId, Sala) VALUES (@pid, @sala);";
-                using (var cmd = new SqlCommand(sql, conn))
+                cmd.Parameters.AddWithValue("@id", id);
+
+                using (var reader = cmd.ExecuteReader())
                 {
-                    cmd.Parameters.AddWithValue("@pid", partidaId);
-                    cmd.Parameters.AddWithValue("@sala", sala);
-                    cmd.ExecuteNonQuery();
+                    if (reader.Read())
+                    {
+                        return new Partida
+                        {
+                            Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                            FechaInicio = reader.GetDateTime(reader.GetOrdinal("FechaInicio")),
+                            FechaFin = reader.IsDBNull(reader.GetOrdinal("FechaFin")) ? (DateTime?)null : reader.GetDateTime(reader.GetOrdinal("FechaFin")),
+                            SalaActual = reader.GetInt32(reader.GetOrdinal("SalaActual")),
+                            JugadorId = reader.GetInt32(reader.GetOrdinal("JugadorId"))
+                        };
+                    }
                 }
             }
         }
-        catch { /* swallow - caller may log */ }
+
+        return null;
     }
 
-    public static void ActualizarSalaActual(int partidaId, int sala)
+
+    public static int CrearPartida(int jugadorId)
     {
-        if (!HasConnection) return;
-        try
+        string query = @"
+            INSERT INTO Partida
+            (FechaInicio, salaActual, JugadorId, FechaFin)
+            VALUES
+            (@fechaInicio, 1, @jugadorId, NULL);
+
+            SELECT SCOPE_IDENTITY();
+        ";
+
+        using (SqlConnection conn = new SqlConnection(_connectionString))
         {
-            using (var conn = new SqlConnection(_connectionString))
+            conn.Open();
+
+            using (SqlCommand cmd = new SqlCommand(query, conn))
             {
-                conn.Open();
-                var sql = "UPDATE Partidas SET SalaActual = @sala WHERE Id = @id";
-                using (var cmd = new SqlCommand(sql, conn))
-                {
-                    cmd.Parameters.AddWithValue("@sala", sala);
-                    cmd.Parameters.AddWithValue("@id", partidaId);
-                    cmd.ExecuteNonQuery();
-                }
+                cmd.Parameters.AddWithValue("@fechaInicio", DateTime.Now);
+                cmd.Parameters.AddWithValue("@jugadorId", jugadorId);
+
+                int id = Convert.ToInt32(cmd.ExecuteScalar());
+
+                return id;
             }
         }
-        catch { }
     }
+
+
+    public static void ActualizarSalaActual(int partidaId, int jugadorId, int sala)
+    {
+        string query = @"
+            UPDATE Partida
+            SET salaActual = @sala
+            WHERE Id = @id;
+
+            UPDATE Jugador
+            SET SalaActual = @sala
+            WHERE Id = @jugadorId;
+        ";
+
+        using (SqlConnection conn = new SqlConnection(_connectionString))
+        {
+            conn.Open();
+
+            using (SqlCommand cmd = new SqlCommand(query, conn))
+            {
+                cmd.Parameters.AddWithValue("@sala", sala);
+                cmd.Parameters.AddWithValue("@id", partidaId);
+                cmd.Parameters.AddWithValue("@jugadorId", jugadorId);
+
+                cmd.ExecuteNonQuery();
+            }
+        }
+    }
+
 
     public static void FinalizarPartida(int partidaId)
     {
-        if (!HasConnection) return;
-        try
+        string query = @"
+            UPDATE Partida
+            SET FechaFin = @fechaFin
+            WHERE Id = @id
+        ";
+
+        using (SqlConnection conn = new SqlConnection(_connectionString))
         {
-            using (var conn = new SqlConnection(_connectionString))
+            conn.Open();
+
+            using (SqlCommand cmd = new SqlCommand(query, conn))
             {
-                conn.Open();
-                var sql = "UPDATE Partidas SET FechaFin = @fin WHERE Id = @id";
-                using (var cmd = new SqlCommand(sql, conn))
-                {
-                    cmd.Parameters.AddWithValue("@fin", DateTime.UtcNow);
-                    cmd.Parameters.AddWithValue("@id", partidaId);
-                    cmd.ExecuteNonQuery();
-                }
+                cmd.Parameters.AddWithValue("@fechaFin", DateTime.Now);
+                cmd.Parameters.AddWithValue("@id", partidaId);
+
+                cmd.ExecuteNonQuery();
             }
         }
-        catch { }
-    }
-
-    public static ResultadoViewModel? ObtenerResultados(int partidaId)
-    {
-        if (!HasConnection) return null;
-        var model = new ResultadoViewModel();
-        model.PartidaId = partidaId;
-
-        try
-        {
-            using (var conn = new SqlConnection(_connectionString))
-            {
-                conn.Open();
-                using (var cmd = new SqlCommand(@"SELECT j.Nombre, p.FechaInicio, p.FechaFin FROM Partidas p JOIN Jugadores j ON p.JugadorId = j.Id WHERE p.Id = @id", conn))
-                {
-                    cmd.Parameters.AddWithValue("@id", partidaId);
-                    using (var r = cmd.ExecuteReader())
-                    {
-                        if (r.Read())
-                        {
-                            model.Nombre = r.GetString(0);
-                            var fInicio = r.GetDateTime(1);
-                            DateTime fFin = r.IsDBNull(2) ? DateTime.UtcNow : r.GetDateTime(2);
-                            model.TiempoTotal = fFin - fInicio;
-                        }
-                    }
-                }
-
-                using (var cmd = new SqlCommand(@"SELECT Sala FROM PartidaSalas WHERE PartidaId = @id ORDER BY Sala", conn))
-                {
-                    cmd.Parameters.AddWithValue("@id", partidaId);
-                    using (var r = cmd.ExecuteReader())
-                    {
-                        while (r.Read()) model.SalasCompletadas.Add(r.GetInt32(0));
-                    }
-                }
-
-                using (var cmd = new SqlCommand(@"
-                    SELECT j.Nombre, COUNT(ps.Sala) as SalasCompletadas, MIN(DATEDIFF(SECOND, p.FechaInicio, ISNULL(p.FechaFin, SYSUTCDATETIME()))) as TiempoSeg
-                    FROM Partidas p
-                    JOIN Jugadores j ON p.JugadorId = j.Id
-                    LEFT JOIN PartidaSalas ps ON ps.PartidaId = p.Id
-                    GROUP BY j.Nombre, p.Id, p.FechaInicio, p.FechaFin
-                    ORDER BY SalasCompletadas DESC, TiempoSeg ASC", conn))
-                {
-                    using (var r = cmd.ExecuteReader())
-                    {
-                        while (r.Read())
-                        {
-                            var item = new LeaderboardItem();
-                            item.Nombre = r.GetString(0);
-                            item.SalasCompletadas = r.IsDBNull(1) ? 0 : r.GetInt32(1);
-                            var seg = r.IsDBNull(2) ? 0 : r.GetInt32(2);
-                            item.Tiempo = TimeSpan.FromSeconds(seg);
-                            model.Leaderboard.Add(item);
-                        }
-                    }
-                }
-            }
-        }
-        catch
-        {
-            return null;
-        }
-
-        return model;
     }
 }

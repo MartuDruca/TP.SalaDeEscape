@@ -13,9 +13,10 @@
         <div id="tablero"></div>
 
         <div style="margin-top:16px;">
-            <button id="botonComenzar" class="next-button">Comenzar</button>
+            <button id="botonComenzar" class="next-button" type="button">Comenzar</button>
         </div>
 
+        <form id="formFinalizarPartida" method="post" action="@Url.Action("FinalizarPartida", "Home")" style="display:none;"></form>
     </div>
 </div>
 
@@ -112,7 +113,13 @@
         if (nivelActual > 3) {
             document.getElementById("mensaje").textContent = "🎉 ¡Ganaste! Completaste todos los niveles.";
             document.getElementById("nivel").textContent = "Juego completado";
-            const btn = document.getElementById("botonComenzar"); btn.textContent = "Jugar nuevamente"; btn.style.display = "inline-block"; btn.onclick = reiniciarJuego; return;
+            const btn = document.getElementById("botonComenzar");
+            btn.textContent = "Ver resultados";
+            btn.style.display = "inline-block";
+            btn.onclick = function () {
+                document.getElementById("formFinalizarPartida").submit();
+            };
+            return;
         }
         tamañoTablero = (nivelActual === 2) ? 4 : 5;
         document.getElementById("nivel").textContent = `Nivel ${nivelActual} - Cuadrícula ${tamañoTablero}x${tamañoTablero}`;

@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("TP Sala de escape")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+a54e9ae2c03312a7e0914aaf3ac67e9dd0365476")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+461de264aaf59a5b33a03614c369d878946d57bb")]
 [assembly: System.Reflection.AssemblyProductAttribute("TP Sala de escape")]
 [assembly: System.Reflection.AssemblyTitleAttribute("TP Sala de escape")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

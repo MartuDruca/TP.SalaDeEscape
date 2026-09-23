@@ -55,7 +55,7 @@
                     const raw = localStorage.getItem(STORAGE_KEY);
                     if (!raw) return null;
                     const obj = JSON.parse(raw);
-                    if (!obj.endTime) return null;
+                    if (!obj || !obj.endTime) return null;
                     return obj;
                 } catch (e) {
                     return null;
@@ -64,10 +64,20 @@
 
             function writeTimer(endTime) {
                 localStorage.setItem(STORAGE_KEY, JSON.stringify({ endTime: endTime }));
+                try { localStorage.setItem('escapeGameTimerStartedAt', String(Date.now())); } catch(e) { }
+            }
+
+            function getElapsedGameMs() {
+                const startedAt = Number(localStorage.getItem('escapeGameTimerStartedAt') || 0);
+                if (!startedAt) return 0;
+                return Math.max(0, Date.now() - startedAt);
             }
 
             function clearTimerStorage() {
-                localStorage.removeItem(STORAGE_KEY);
+                try {
+                    localStorage.removeItem(STORAGE_KEY);
+                    localStorage.removeItem('escapeGameTimerStartedAt');
+                } catch(e) { }
             }
 
             function formatRemaining(ms) {
@@ -79,7 +89,6 @@
                 return String(hours).padStart(2,'0') + ':' + String(minutes).padStart(2,'0') + ':' + String(seconds).padStart(2,'0');
             }
 
-            // ensure there's a single timer element appended to the body
             let el = document.getElementById('global-timer');
             if (!el) {
                 el = document.createElement('div');
@@ -89,7 +98,6 @@
                 el.textContent = '00:00:00';
                 document.body.appendChild(el);
             } else {
-                // if a view replaced the body content, re-append to body to keep it top-level
                 if (el.parentNode !== document.body) document.body.appendChild(el);
             }
 
@@ -97,19 +105,24 @@
 
             function updateOnce() {
                 const data = readTimer();
-                if (!data) {
+                if (!data || !data.endTime) {
+                    el.textContent = '00:00:00';
                     el.classList.remove('active');
+                    if (intervalId) { clearInterval(intervalId); intervalId = null; }
                     return;
                 }
-                const remaining = data.endTime - Date.now();
+
+                const remaining = Number(data.endTime) - Date.now();
                 if (remaining <= 0) {
                     el.textContent = '00:00:00';
                     clearTimerStorage();
-                    el.classList.add('active');
-                } else {
-                    el.textContent = formatRemaining(remaining);
-                    el.classList.add('active');
+                    if (intervalId) { clearInterval(intervalId); intervalId = null; }
+                    el.classList.remove('active');
+                    return;
                 }
+
+                el.textContent = formatRemaining(remaining);
+                el.classList.add('active');
             }
 
             function startInterval() {
@@ -117,7 +130,40 @@
                 intervalId = setInterval(updateOnce, 500);
             }
 
+            function ensureRunningTimer() {
+                const data = readTimer();
+                if (data && Number(data.endTime) > Date.now()) {
+                    updateOnce();
+                    startInterval();
+                }
+            }
+
+            function shouldAutoStartTimerForRoom() {
+                const path = window.location.pathname || '';
+                return /\/(home\/)?(sala|introduccion|salas)/i.test(path) || /Sala\d|part2/i.test(path);
+            }
+
+            function ensureTimerVisibleInGameRooms() {
+                const data = readTimer();
+                if (!data && shouldAutoStartTimerForRoom()) {
+                    window.startGlobalTimer(30);
+                    return;
+                }
+
+                if (data && Number(data.endTime) > Date.now()) {
+                    updateOnce();
+                    startInterval();
+                }
+            }
+
             window.startGlobalTimer = function (minutes) {
+                const data = readTimer();
+                if (data && Number(data.endTime) > Date.now()) {
+                    updateOnce();
+                    startInterval();
+                    return;
+                }
+
                 const end = Date.now() + Math.round(minutes * 60 * 1000);
                 writeTimer(end);
                 updateOnce();
@@ -126,16 +172,14 @@
 
             window.clearGlobalTimer = function () {
                 clearTimerStorage();
-                updateOnce();
-                // ensure hidden
+                el.textContent = '00:00:00';
                 el.classList.remove('active');
+                if (intervalId) { clearInterval(intervalId); intervalId = null; }
             };
 
-            // initialize on load
             updateOnce();
-            startInterval();
+            ensureTimerVisibleInGameRooms();
 
-            // keep in sync across tabs/windows
             window.addEventListener('storage', function (e) {
                 if (e.key === STORAGE_KEY) updateOnce();
             });
